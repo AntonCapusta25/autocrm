@@ -18,10 +18,15 @@ import { ContactModal } from './components/Contacts/ContactModal';
 import { TaskModal } from './components/Tasks/TaskModal';
 import { OpportunityModal } from './components/Pipeline/OpportunityModal';
 import { AuthView } from './components/Auth/AuthView';
+import { PaidModuleRequestModal } from './components/Modules/PaidModuleRequestModal';
+import { ModulesMarketplaceModal } from './components/Modules/ModulesMarketplaceModal';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
-  const { isAuthenticated, isOnboardingOpen, setIsOnboardingOpen, isModuleEnabled } = useApp();
+  const { 
+    isAuthenticated, isOnboardingOpen, setIsOnboardingOpen, isModuleEnabled,
+    isModuleModalOpen, activeSetupModuleId, openModuleSetupModal, closeModuleSetupModal 
+  } = useApp();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
 
   // Global Modals State
@@ -29,6 +34,7 @@ const MainAppContent: React.FC = () => {
   const [quickContactModalOpen, setQuickContactModalOpen] = useState(false);
   const [quickTaskModalOpen, setQuickTaskModalOpen] = useState(false);
   const [quickDealModalOpen, setQuickDealModalOpen] = useState(false);
+  const [marketplaceModalOpen, setMarketplaceModalOpen] = useState(false);
 
   // Pre-selected entities for task modal
   const [taskInitialContact, setTaskInitialContact] = useState<Contact | null>(null);
@@ -66,6 +72,7 @@ const MainAppContent: React.FC = () => {
         activeTab={activeTab} 
         onTabChange={(tab) => setActiveTab(tab)} 
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        onOpenMarketplace={() => setMarketplaceModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -174,6 +181,25 @@ const MainAppContent: React.FC = () => {
           onClose={() => setQuickDealModalOpen(false)} 
         />
       )}
+
+      {/* Modules & Add-Ons Ecosystem Marketplace Modal */}
+      {marketplaceModalOpen && (
+        <ModulesMarketplaceModal 
+          isOpen={marketplaceModalOpen}
+          onClose={() => setMarketplaceModalOpen(false)}
+          onRequestSetup={(modId) => {
+            setMarketplaceModalOpen(false);
+            openModuleSetupModal(modId);
+          }}
+        />
+      )}
+
+      {/* Paid Enterprise Module Request Flow (Typeform / MultiStep Style) */}
+      <PaidModuleRequestModal 
+        isOpen={isModuleModalOpen}
+        onClose={closeModuleSetupModal}
+        initialModuleId={activeSetupModuleId}
+      />
     </div>
   );
 };

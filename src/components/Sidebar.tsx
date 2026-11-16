@@ -22,9 +22,15 @@ interface SidebarProps {
   activeTab: NavTab;
   onTabChange: (tab: NavTab) => void;
   onOpenOnboarding: () => void;
+  onOpenMarketplace?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpenOnboarding }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  activeTab, 
+  onTabChange, 
+  onOpenOnboarding,
+  onOpenMarketplace,
+}) => {
   const { 
     currentWorkspace, contacts, companies, opportunities, 
     tasks, teamMembers, workflows, conversations, 
@@ -244,6 +250,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
             <span>Team & Access</span>
           </div>
           <span className="notion-badge">{teamMembers.length}</span>
+        </button>
+
+        <button 
+          className="notion-nav-item"
+          onClick={onOpenMarketplace}
+          style={{ color: 'var(--lilac-300)' }}
+        >
+          <div className="notion-nav-left">
+            <Sparkles size={15} style={{ color: 'var(--lilac-400)' }} />
+            <span>Modules & Add-ons</span>
+          </div>
+          <span className="notion-badge lilac" style={{ fontSize: '0.66rem' }}>✨ Enterprise</span>
         </button>
       </div>
 

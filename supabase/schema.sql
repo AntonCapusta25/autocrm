@@ -324,3 +324,27 @@ CREATE POLICY "Tenant notion_docs isolation" ON notion_docs
   FOR ALL TO authenticated
   USING (public.user_has_workspace_access(workspace_id))
   WITH CHECK (public.user_has_workspace_access(workspace_id));
+
+-- ─── 14. Enterprise Module Setup Requests & Booking Leads (AutoFlowWebProd Sync) ───
+CREATE TABLE IF NOT EXISTS booking_leads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  service TEXT,
+  size TEXT,
+  message TEXT,
+  platform TEXT DEFAULT 'AUTOCRM_PAID_MODULE',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE booking_leads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert to booking_leads" ON booking_leads
+  FOR INSERT TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read booking_leads" ON booking_leads
+  FOR SELECT TO authenticated
+  USING (true);
+

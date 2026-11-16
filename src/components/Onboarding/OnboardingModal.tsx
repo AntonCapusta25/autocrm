@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { CRM_MODULES_CATALOG, INDUSTRY_TEMPLATES } from '../../lib/initialData';
+import { CRM_MODULES_CATALOG, PAID_MODULES_CATALOG, INDUSTRY_TEMPLATES } from '../../lib/initialData';
 import { CRMModuleId, OnboardingConfig } from '../../types';
 import { 
   Check, ArrowRight, ArrowLeft, Sparkles, Building2, Users, 
@@ -61,7 +61,7 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
 };
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => {
-  const { onboardingConfig, saveOnboarding, currentWorkspace } = useApp();
+  const { onboardingConfig, saveOnboarding, currentWorkspace, openModuleSetupModal } = useApp();
 
   const [step, setStep] = useState<number>(1);
   const [selectedRole, setSelectedRole] = useState<string>(onboardingConfig.role || ROLES[0].id);
@@ -521,6 +521,59 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => 
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Enterprise Add-on Modules (Managed Setup Required) */}
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--lilac-300)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      ✨ ENTERPRISE ADD-ON MODULES (MANAGED SETUP)
+                    </span>
+                    <span className="notion-badge lilac" style={{ fontSize: '0.64rem' }}>Custom Setup</span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    Configured by AutoFlow Engineers
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
+                  {PAID_MODULES_CATALOG.map(mod => (
+                    <div
+                      key={mod.id}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(167, 139, 250, 0.03)',
+                        border: '1px dashed rgba(167, 139, 250, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                      }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {mod.name}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '1px' }}>
+                          {mod.priceNote} · {mod.setupTime}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => openModuleSetupModal(mod.id)}
+                        style={{ fontSize: '0.7rem', padding: '3px 8px', flexShrink: 0, borderColor: 'var(--lilac-border)', color: 'var(--lilac-300)' }}
+                      >
+                        Request →
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

@@ -14,7 +14,7 @@ const CHANNEL_ICONS: Record<MessageChannel, React.ReactNode> = {
 };
 
 export const ConversationsView: React.FC = () => {
-  const { conversations, sendMessage, markConversationRead, contacts, opportunities } = useApp();
+  const { conversations, sendMessage, markConversationRead, contacts, opportunities, openModuleSetupModal } = useApp();
 
   const [activeThreadId, setActiveThreadId] = useState<string>(conversations[0]?.id || '');
   const [selectedChannelFilter, setSelectedChannelFilter] = useState<'all' | MessageChannel>('all');
@@ -53,7 +53,7 @@ export const ConversationsView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Header bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '1.4rem' }}>💬</span>
@@ -66,6 +66,16 @@ export const ConversationsView: React.FC = () => {
             Centralized 2-way messaging across SMS, Email, WhatsApp, and Webchat with instantaneous contact sync.
           </p>
         </div>
+
+        <button 
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => openModuleSetupModal('whatsapp_cloud')}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', borderColor: 'var(--lilac-border)' }}
+        >
+          <span>✨</span>
+          <span>Connect WhatsApp Cloud API</span>
+        </button>
       </div>
 
       {/* Main 3-Column Omnichannel Dashboard */}

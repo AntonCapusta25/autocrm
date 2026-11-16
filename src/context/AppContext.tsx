@@ -4,7 +4,7 @@ import {
   Contact, Company, Opportunity, Task, ContactActivity, 
   Workspace, TeamMember, AppNotification, NotificationPreferences, PipelineStage, UserRole,
   OnboardingConfig, WorkflowAutomation, ConversationThread, CalendarAppointment, NotionDoc,
-  ChatMessage, MessageChannel, NotionBlock, CRMModuleId
+  ChatMessage, MessageChannel, NotionBlock, CRMModuleId, ModuleSetupRequest
 } from '../types';
 import { DEFAULT_ONBOARDING_CONFIG } from '../lib/initialData';
 import { getSupabaseClient } from '../lib/supabase';
@@ -117,6 +117,24 @@ interface AppContextType {
   markAllNotificationsRead: () => void;
   notificationPreferences: NotificationPreferences;
   updateNotificationPreferences: (prefs: Partial<NotificationPreferences>) => void;
+
+  // Paid & Managed Setup Modules (AutoFlow Engineering)
+  moduleSetupRequests: ModuleSetupRequest[];
+  isModuleModalOpen: boolean;
+  activeSetupModuleId: string | null;
+  openModuleSetupModal: (moduleId?: string) => void;
+  closeModuleSetupModal: () => void;
+  submitModuleRequest: (req: {
+    moduleId: string;
+    moduleName: string;
+    phone: string;
+    message: string;
+    businessSize: string;
+    service: string;
+    contactName: string;
+    contactEmail: string;
+    companyName?: string;
+  }) => Promise<{ success: boolean; message?: string }>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -214,6 +232,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [allModuleRequests, setAllModuleRequests] = useState<ModuleSetupRequest[]>(() => {
+    const saved = localStorage.getItem(LS_PREFIX + 'module_requests');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
+  const [activeSetupModuleId, setActiveSetupModuleId] = useState<string | null>(null);
+
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>({
     notify_on_assignment: true,
     notify_due_soon: true,
@@ -290,6 +316,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(LS_PREFIX + 'notion_docs', JSON.stringify(allNotionDocs));
   }, [allNotionDocs]);
 
+  useEffect(() => {
+    localStorage.setItem(LS_PREFIX + 'module_requests', JSON.stringify(allModuleRequests));
+  }, [allModuleRequests]);
+
   // Strictly Scoped Current Tenant Workspace & User
   const currentWorkspace = useMemo<Workspace>(() => {
     return (
@@ -360,6 +390,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const notifications = useMemo(
     () => allNotifications.filter(n => n.workspace_id === currentWorkspace.id),
     [allNotifications, currentWorkspace.id]
+  );
+  const moduleSetupRequests = useMemo(
+    () => allModuleRequests.filter(r => r.workspace_id === currentWorkspace.id),
+    [allModuleRequests, currentWorkspace.id]
   );
   const workflows = useMemo(
     () => allWorkflows.filter(w => w.workspace_id === currentWorkspace.id),
@@ -1417,6 +1451,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotificationPreferences(prev => ({ ...prev, ...prefs }));
   };
 
+  // Paid & Managed Setup Modules Actions (AutoFlow Engineering)
+  const openModuleSetupModal = (moduleId?: string) => {
+    setActiveSetupModuleId(moduleId || null);
+    setIsModuleModalOpen(true);
+  };
+
+  const closeModuleSetupModal = () => {
+    setIsModuleModalOpen(false);
+    setActiveSetupModuleId(null);
+  };
+
+  const submitModuleRequest = async (req: {
+    moduleId: string;
+    moduleName: string;
+    phone: string;
+    message: string;
+    businessSize: string;
+    service: string;
+    contactName: string;
+    contactEmail: string;
+    companyName?: string;
+  }): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const newReq: ModuleSetupRequest = {
+        id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        workspace_id: currentWorkspace.id,
+        module_id: req.moduleId,
+        module_name: req.moduleName,
+        phone: req.phone,
+        message: req.message,
+        business_size: req.businessSize,
+        service: req.service,
+        contact_name: req.contactName,
+        contact_email: req.contactEmail,
+        company_name: req.companyName || currentWorkspace.name,
+        status: 'pending_review',
+        created_at: new Date().toISOString(),
+      };
+
+      setAllModuleRequests(prev => [newReq, ...prev]);
+
+      // Insert into Supabase booking_leads table (matching AutoFlowWebProd schema)
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          await sb.from('booking_leads').insert([{
+            name: req.contactName,
+            email: req.contactEmail,
+            phone: req.phone,
+            service: req.service,
+            size: req.businessSize,
+            message: req.message,
+            platform: 'AUTOCRM_PAID_MODULE',
+          }]);
+        } catch (err) {
+          console.warn('Supabase booking_leads notice:', err);
+        }
+      }
+
+      // Add in-app notification
+      const newNotif: AppNotification = {
+        id: `notif-${Date.now()}`,
+        workspace_id: currentWorkspace.id,
+        user_id: currentUserId || 'owner',
+        type: 'workflow_run',
+        title: 'Module Setup Requested',
+        message: `Setup request for "${req.moduleName}" received. Our engineers will review your configuration within 24 hours.`,
+        read: false,
+        created_at: new Date().toISOString(),
+      };
+      setAllNotifications(prev => [newNotif, ...prev]);
+
+      // Celebrate
+      try {
+        confetti({
+          particleCount: 70,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#a78bfa', '#c4b5fd', '#60a5fa', '#34d399'],
+        });
+      } catch (_) {}
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('Error submitting module setup request:', err);
+      return { success: false, message: err?.message || 'Could not submit request.' };
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1487,6 +1610,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markAllNotificationsRead,
         notificationPreferences,
         updateNotificationPreferences,
+        moduleSetupRequests,
+        isModuleModalOpen,
+        activeSetupModuleId,
+        openModuleSetupModal,
+        closeModuleSetupModal,
+        submitModuleRequest,
       }}
     >
       {children}

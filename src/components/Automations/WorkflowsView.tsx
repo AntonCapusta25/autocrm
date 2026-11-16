@@ -18,7 +18,10 @@ const ACTION_ICONS: Record<WorkflowActionType, React.ReactNode> = {
 };
 
 export const WorkflowsView: React.FC = () => {
-  const { workflows, toggleWorkflowActive, runWorkflowTest, addWorkflow, deleteWorkflow } = useApp();
+  const { 
+    workflows, toggleWorkflowActive, runWorkflowTest, 
+    addWorkflow, deleteWorkflow, openModuleSetupModal 
+  } = useApp();
 
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>(workflows[0]?.id || '');
   const [executingId, setExecutingId] = useState<string | null>(null);
@@ -159,6 +162,75 @@ export const WorkflowsView: React.FC = () => {
               </div>
             );
           })}
+
+          {/* Enterprise Managed Recipes (Paid Setup) */}
+          <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--lilac-300)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={12} /> ENTERPRISE ADD-ON FLOWS
+            </div>
+
+            <div 
+              className="notion-card"
+              style={{
+                padding: '12px 14px',
+                borderRadius: '8px',
+                background: 'rgba(167, 139, 250, 0.04)',
+                border: '1px dashed rgba(167, 139, 250, 0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  🎙️ AI Voice Call Agent
+                </span>
+                <span className="notion-badge lilac" style={{ fontSize: '0.64rem' }}>Setup Req.</span>
+              </div>
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.35 }}>
+                Sub-400ms neural phone dialer for automated calendar booking.
+              </p>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => openModuleSetupModal('ai_voice')}
+                style={{ fontSize: '0.72rem', padding: '4px 8px', width: '100%', justifyContent: 'center' }}
+              >
+                Request Voice Setup →
+              </button>
+            </div>
+
+            <div 
+              className="notion-card"
+              style={{
+                padding: '12px 14px',
+                borderRadius: '8px',
+                background: 'rgba(52, 211, 153, 0.04)',
+                border: '1px dashed rgba(52, 211, 153, 0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  💬 WhatsApp Cloud Green Tick
+                </span>
+                <span className="notion-badge lilac" style={{ fontSize: '0.64rem' }}>Meta Sync</span>
+              </div>
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.35 }}>
+                Official Meta verified API broadcast & 10DLC carrier routes.
+              </p>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => openModuleSetupModal('whatsapp_cloud')}
+                style={{ fontSize: '0.72rem', padding: '4px 8px', width: '100%', justifyContent: 'center' }}
+              >
+                Request WhatsApp Setup →
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Interactive Flowchart Canvas */}

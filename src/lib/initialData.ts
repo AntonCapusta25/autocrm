@@ -1,7 +1,7 @@
 import { 
   Workspace, TeamMember, Company, Contact, Opportunity, Task, ContactActivity, 
-  AppNotification, OnboardingConfig, CRMModuleDefinition, WorkflowAutomation, 
-  ConversationThread, CalendarAppointment, NotionDoc 
+  AppNotification, OnboardingConfig, CRMModuleDefinition, PaidModuleDefinition, 
+  WorkflowAutomation, ConversationThread, CalendarAppointment, NotionDoc 
 } from '../types';
 
 export const INITIAL_WORKSPACE: Workspace = {
@@ -546,6 +546,95 @@ export const CRM_MODULES_CATALOG: CRMModuleDefinition[] = [
     category: 'admin',
     defaultEnabled: true,
   },
+];
+
+// ─── Paid & Managed Setup Modules (AutoFlow Engineering) ───
+export const PAID_MODULES_CATALOG: PaidModuleDefinition[] = [
+  {
+    id: 'ai_voice',
+    name: 'Autonomous AI Voice & Dialers',
+    tagline: 'Sub-400ms ultra-low latency voice agents for inbound booking and outbound qualification',
+    description: 'Telecom SIP trunk setup (Twilio/Retell/Vapi), carrier registration, neural voice model tuning on your playbooks, and direct calendar appointment booking during live phone calls.',
+    icon: 'PhoneCall',
+    priceNote: 'Managed Setup + Usage',
+    setupTime: '24–48 Hours',
+    serviceKey: 'ai-agents',
+    deliverables: [
+      'Dedicated local/toll-free phone number provisioning',
+      'Neural voice synthesis & latency optimization (<450ms)',
+      'Direct calendar booking during live voice calls',
+      'Inbound call triage and human-transfer failover',
+      'Real-time call recording, sentiment analysis & transcript sync'
+    ]
+  },
+  {
+    id: 'whatsapp_cloud',
+    name: 'WhatsApp Business Cloud API & 10DLC',
+    tagline: 'Official Meta Green Tick approval and carrier-grade 10DLC A2P compliant messaging',
+    description: 'End-to-end Meta Business Verification, official WhatsApp Cloud API access, pre-approved message templates, and carrier-registered 10DLC SMS with 99.8% inbox deliverability.',
+    icon: 'MessageCircle',
+    priceNote: 'Enterprise Add-On',
+    setupTime: '24–72 Hours',
+    serviceKey: 'process-auto',
+    deliverables: [
+      'Meta Business Manager verification & WhatsApp Cloud API pairing',
+      'Green Tick official brand badge assistance',
+      'A2P 10DLC carrier compliance & brand trust score setup',
+      'Automated multi-language WhatsApp interactive reply flows',
+      'Unified inbox synchronization directly inside AutoFlow Studio'
+    ]
+  },
+  {
+    id: 'custom_erp',
+    name: 'Custom ERP & Legacy Data Pipelines',
+    tagline: 'Two-way real-time data sync with PostgreSQL, SAP, Salesforce, HubSpot or legacy systems',
+    description: 'Bespoke middleware and automated data transformation pipelines connecting your external databases or legacy systems directly into your multi-tenant AutoFlow workspace.',
+    icon: 'Database',
+    priceNote: 'Custom Architecture',
+    setupTime: '3–5 Days',
+    serviceKey: 'custom',
+    deliverables: [
+      'Bidirectional real-time database webhooks & event streaming',
+      'Custom schema mapping & field normalization',
+      'Legacy CRM data migration without downtime',
+      'Custom API endpoints & secure token authentication',
+      'Automated error monitoring & failover retry queues'
+    ]
+  },
+  {
+    id: 'custom_agents',
+    name: 'Bespoke Autonomous AI Knowledge Agents',
+    tagline: 'Domain-specific AI agents grounded in your private documents, contracts, and SOPs',
+    description: 'Deep vector embeddings on your proprietary company manuals, pricing sheets, and past deal transcripts with rigorous safety guardrails and multi-step action execution.',
+    icon: 'Bot',
+    priceNote: 'Managed Setup',
+    setupTime: '48 Hours',
+    serviceKey: 'ai-agents',
+    deliverables: [
+      'Vector indexing on unlimited company PDFs, docs & playbooks',
+      'Multi-model fallback routing (Gemini 2.5 Pro / Claude 3.5 Sonnet)',
+      'Automated action permissions (deal stage moves, document drafting)',
+      'Hallucination prevention & strict compliance boundaries',
+      'Continuous prompt tuning based on live team interactions'
+    ]
+  },
+  {
+    id: 'lead_scraping',
+    name: 'Automated Lead Scraping & Multi-Inbox Warmup',
+    tagline: 'Automated pipeline feeder with verified decision-maker emails and warmed domains',
+    description: 'Turnkey outbound infrastructure including secondary domains, DNS configuration (SPF, DKIM, DMARC), automated inbox warming pools, and hyper-targeted verified lead enrichment.',
+    icon: 'Target',
+    priceNote: 'Growth Add-On',
+    setupTime: '48–72 Hours',
+    serviceKey: 'lead-gen',
+    deliverables: [
+      'Secondary domain setup with SPF, DKIM & DMARC records',
+      'Automated 30-day inbox warming network',
+      'Verified corporate email scraping with 0% bounce guarantee',
+      'Waterfall enrichment (LinkedIn, company revenue, tech stack)',
+      'Direct push into AutoFlow pipeline as qualified lead opportunities'
+    ]
+  }
 ];
 
 // ─── Default Onboarding Configuration ───

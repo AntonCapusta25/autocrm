@@ -159,6 +159,42 @@ export interface CRMModuleDefinition {
   defaultEnabled: boolean;
 }
 
+// ─── Paid & Managed Setup Modules (AutoFlow Engineering) ───
+export type PaidModuleId = 
+  | 'ai_voice' 
+  | 'whatsapp_cloud' 
+  | 'custom_erp' 
+  | 'lead_scraping' 
+  | 'custom_agents';
+
+export interface PaidModuleDefinition {
+  id: PaidModuleId;
+  name: string;
+  tagline: string;
+  description: string;
+  icon: string;
+  priceNote: string;
+  setupTime: string;
+  serviceKey: string;
+  deliverables: string[];
+}
+
+export interface ModuleSetupRequest {
+  id: string;
+  workspace_id: string;
+  module_id: string;
+  module_name: string;
+  phone: string;
+  message: string;
+  business_size: string;
+  service: string;
+  contact_name: string;
+  contact_email: string;
+  company_name?: string;
+  status: 'pending_review' | 'engineer_assigned' | 'in_configuration' | 'live';
+  created_at: string;
+}
+
 // ─── Automations & Workflows ───
 export type WorkflowTriggerType = 
   | 'contact_created'
