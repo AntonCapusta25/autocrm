@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Building2, Mail, Lock, User, ArrowRight, AlertCircle, 
-  Layers, ChevronLeft, ChevronRight, Zap, TrendingUp, 
-  MessageSquare, FileText, CheckCircle2, ShieldCheck, 
-  Sparkles, Clock, Check
+  Layers, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface SlideItem {
@@ -12,7 +10,8 @@ interface SlideItem {
   tag: string;
   title: string;
   description: string;
-  renderVisual: () => React.ReactNode;
+  imageSrc: string;
+  glowColor: string;
 }
 
 const SLIDES: SlideItem[] = [
@@ -21,464 +20,32 @@ const SLIDES: SlideItem[] = [
     tag: 'PIPELINE VELOCITY',
     title: 'Intelligent Deal Tracking & Revenue Forecasting',
     description: 'Track deal movements from initial inquiry to closed-won with automated stage velocity and real-time revenue analytics.',
-    renderVisual: () => (
-      <div style={{ position: 'relative', width: '100%', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Background glow orb */}
-        <div 
-          style={{
-            position: 'absolute',
-            width: '180px',
-            height: '180px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.22) 0%, rgba(167, 139, 250, 0) 70%)',
-            filter: 'blur(20px)',
-          }}
-        />
-
-        {/* Center Big 3D Avatar Card */}
-        <div 
-          className="frozen-glass-panel animate-float"
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            padding: '16px 20px',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(167, 139, 250, 0.15)',
-          }}
-        >
-          <div style={{ position: 'relative' }}>
-            <img 
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80"
-              alt="Executive"
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '2px solid var(--lilac-400)',
-                boxShadow: '0 0 16px rgba(167, 139, 250, 0.4)',
-              }}
-            />
-            <span 
-              style={{
-                position: 'absolute',
-                bottom: '0',
-                right: '0',
-                width: '14px',
-                height: '14px',
-                borderRadius: '50%',
-                background: '#34d399',
-                border: '2px solid #0d0f14',
-              }}
-            />
-          </div>
-
-          <div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
-              Elena Rostova
-            </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
-              VP of Commercial Growth
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-              <span className="notion-tag emerald" style={{ fontSize: '0.68rem', padding: '2px 6px' }}>
-                Deal Won • $148,000
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating Stat Badge 1 (Top Right) */}
-        <div 
-          className="frozen-glass-badge animate-float-delayed"
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '20px',
-            zIndex: 3,
-            padding: '8px 12px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <div 
-            style={{
-              width: '26px',
-              height: '26px',
-              borderRadius: '6px',
-              background: 'rgba(52, 211, 153, 0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#34d399',
-            }}
-          >
-            <TrendingUp size={14} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Win Rate</div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#34d399' }} className="tabular-nums">+34.8%</div>
-          </div>
-        </div>
-
-        {/* Floating Stat Badge 2 (Bottom Left) */}
-        <div 
-          className="frozen-glass-badge animate-float"
-          style={{
-            position: 'absolute',
-            bottom: '14px',
-            left: '20px',
-            zIndex: 3,
-            padding: '8px 12px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <div 
-            style={{
-              width: '26px',
-              height: '26px',
-              borderRadius: '6px',
-              background: 'var(--lilac-bg-subtle)',
-              border: '1px solid var(--lilac-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--lilac-300)',
-            }}
-          >
-            <Sparkles size={13} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Weighted Pipeline</div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }} className="tabular-nums">$482,000</div>
-          </div>
-        </div>
-      </div>
-    ),
+    imageSrc: '/assets/clay/chart.jpg',
+    glowColor: 'rgba(167, 139, 250, 0.28)',
+  },
+  {
+    id: 'workflows',
+    tag: 'AUTONOMOUS WORKFLOWS',
+    title: 'Self-Executing Triggers & Automation Chains',
+    description: 'Deploy multi-step event triggers, automated lead routing, follow-up sequences, and instant webhook dispatches.',
+    imageSrc: '/assets/clay/lightning.jpg',
+    glowColor: 'rgba(196, 181, 253, 0.3)',
   },
   {
     id: 'inbox',
     tag: 'OMNICHANNEL MESSAGING',
     title: 'Unified Customer Stream & Speed-to-Lead',
     description: 'Consolidate every lead touchpoint across SMS, WhatsApp, and email into one synchronized stream with instant contact timeline records.',
-    renderVisual: () => (
-      <div style={{ position: 'relative', width: '100%', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Glow */}
-        <div 
-          style={{
-            position: 'absolute',
-            width: '200px',
-            height: '200px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(96, 165, 250, 0.18) 0%, rgba(96, 165, 250, 0) 70%)',
-            filter: 'blur(24px)',
-          }}
-        />
-
-        {/* Main Floating Message Card */}
-        <div 
-          className="frozen-glass-panel animate-float"
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            padding: '16px 18px',
-            borderRadius: '16px',
-            width: '290px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ position: 'relative' }}>
-                <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" 
-                  alt="Contact" 
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                />
-                <span 
-                  style={{
-                    position: 'absolute',
-                    bottom: '-1px',
-                    right: '-1px',
-                    width: '9px',
-                    height: '9px',
-                    borderRadius: '50%',
-                    background: '#60a5fa',
-                    border: '1.5px solid #0d0f14',
-                  }}
-                />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>Marcus Vance</div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>CTO • Horizon Global</div>
-              </div>
-            </div>
-            <span className="notion-tag sky" style={{ fontSize: '0.65rem' }}>WHATSAPP</span>
-          </div>
-
-          <div 
-            style={{ 
-              padding: '9px 12px', 
-              borderRadius: '8px', 
-              background: 'rgba(0, 0, 0, 0.4)', 
-              fontSize: '0.76rem', 
-              color: 'var(--text-main)',
-              lineHeight: 1.45,
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-            }}
-          >
-            "Proposal looks fantastic. Let's execute the contract and schedule kickoff."
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-            <span>Speed-to-lead: 28s</span>
-            <span style={{ color: 'var(--lilac-300)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <Check size={12} /> Delivered
-            </span>
-          </div>
-        </div>
-
-        {/* Orbit Avatar Stack (Top Left) */}
-        <div 
-          className="frozen-glass-badge animate-float-delayed"
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '24px',
-            zIndex: 3,
-            padding: '6px 12px',
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <div style={{ display: 'flex', marginLeft: '6px' }}>
-            {['1494790108377-be9c29b29330', '1500648767791-00dcc994a43e'].map((id, idx) => (
-              <img
-                key={id}
-                src={`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=100&q=80`}
-                alt=""
-                style={{
-                  width: '22px',
-                  height: '22px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  marginLeft: idx > 0 ? '-6px' : 0,
-                  border: '1.5px solid var(--notion-surface-card)',
-                }}
-              />
-            ))}
-          </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Channels</span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: 'workflows',
-    tag: 'AUTONOMOUS WORKFLOWS',
-    title: 'Self-Executing Triggers & Automation Chains',
-    description: 'Deploy multi-step triggers, drip campaigns, automated lead allocations, and outbound webhooks without manual intervention.',
-    renderVisual: () => (
-      <div style={{ position: 'relative', width: '100%', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Glow */}
-        <div 
-          style={{
-            position: 'absolute',
-            width: '180px',
-            height: '180px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.25) 0%, rgba(167, 139, 250, 0) 70%)',
-            filter: 'blur(20px)',
-          }}
-        />
-
-        {/* 3D Flow Nodes Cascade */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 2, width: '280px' }}>
-          {/* Node 1 */}
-          <div 
-            className="frozen-glass-panel animate-float"
-            style={{
-              padding: '10px 14px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderLeft: '3px solid var(--lilac-400)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div 
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: 'var(--lilac-bg-subtle)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--lilac-300)',
-                }}
-              >
-                <Zap size={13} />
-              </div>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-main)' }}>Trigger: Deal Qualified</span>
-            </div>
-            <span className="notion-tag lilac" style={{ fontSize: '0.62rem' }}>EVENT</span>
-          </div>
-
-          {/* Node 2 */}
-          <div 
-            className="frozen-glass-badge animate-float-delayed"
-            style={{
-              padding: '10px 14px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderLeft: '3px solid #34d399',
-              marginLeft: '16px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div 
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: 'rgba(52, 211, 153, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#34d399',
-                }}
-              >
-                <CheckCircle2 size={13} />
-              </div>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-main)' }}>Action: Send SMS + Booking Link</span>
-            </div>
-            <span className="notion-tag emerald" style={{ fontSize: '0.62rem' }}>SENT</span>
-          </div>
-        </div>
-
-        {/* Floating Metrics Badge */}
-        <div 
-          className="frozen-glass-badge animate-float"
-          style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '24px',
-            zIndex: 3,
-            padding: '6px 10px',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          <Clock size={12} style={{ color: 'var(--lilac-300)' }} />
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Execution: <strong>42ms</strong></span>
-        </div>
-      </div>
-    ),
+    imageSrc: '/assets/clay/chat.jpg',
+    glowColor: 'rgba(96, 165, 250, 0.25)',
   },
   {
     id: 'docs',
     tag: 'WORKSPACE & PLAYBOOKS',
     title: 'Multi-View Databases & Executive Playbooks',
     description: 'Switch between Table, Kanban Board, Calendar, and interactive document SOPs with complete workspace data isolation.',
-    renderVisual: () => (
-      <div style={{ position: 'relative', width: '100%', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Glow */}
-        <div 
-          style={{
-            position: 'absolute',
-            width: '180px',
-            height: '180px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167, 139, 250, 0.2) 0%, rgba(167, 139, 250, 0) 70%)',
-            filter: 'blur(20px)',
-          }}
-        />
-
-        {/* 3D Glass Document Layer */}
-        <div 
-          className="frozen-glass-panel animate-float"
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            padding: '16px 20px',
-            borderRadius: '16px',
-            width: '280px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            <span style={{ fontSize: '1.2rem' }}>📝</span>
-            <div>
-              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-main)' }}>Client Onboarding SOP</div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Updated by Workspace Owner</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {[
-              { label: 'Security Verification & Tenant RLS', done: true },
-              { label: 'Pipeline Stage Customization', done: true },
-              { label: 'Team Member Invite & Roles', done: false },
-            ].map((todo, idx) => (
-              <div 
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.74rem',
-                  color: todo.done ? 'var(--text-muted)' : 'var(--text-main)',
-                  textDecoration: todo.done ? 'line-through' : 'none',
-                }}
-              >
-                <div 
-                  className={`notion-checkbox ${todo.done ? 'checked' : ''}`}
-                  style={{ width: '13px', height: '13px' }}
-                >
-                  {todo.done && <Check size={9} strokeWidth={3} />}
-                </div>
-                <span>{todo.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Floating Security Badge */}
-        <div 
-          className="frozen-glass-badge animate-float-delayed"
-          style={{
-            position: 'absolute',
-            bottom: '12px',
-            left: '20px',
-            zIndex: 3,
-            padding: '6px 12px',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          <ShieldCheck size={13} style={{ color: '#34d399' }} />
-          <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>Multi-Tenant Isolated</span>
-        </div>
-      </div>
-    ),
+    imageSrc: '/assets/clay/docs.jpg',
+    glowColor: 'rgba(52, 211, 153, 0.22)',
   },
 ];
 
@@ -559,47 +126,47 @@ export const AuthView: React.FC = () => {
         background: 'var(--notion-deep-black)',
         color: 'var(--text-main)',
         display: 'grid',
-        gridTemplateColumns: '1.15fr 0.85fr',
+        gridTemplateColumns: '1.12fr 0.88fr',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Ambient background light spheres */}
+      {/* Ambient background light orbs for frosted glass depth */}
       <div 
         style={{
           position: 'absolute',
-          top: '-10%',
-          left: '5%',
-          width: '500px',
-          height: '500px',
+          top: '-15%',
+          left: '8%',
+          width: '550px',
+          height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(70px)',
           pointerEvents: 'none',
         }}
       />
       <div 
         style={{
           position: 'absolute',
-          bottom: '-10%',
-          left: '30%',
-          width: '450px',
-          height: '450px',
+          bottom: '-15%',
+          left: '25%',
+          width: '500px',
+          height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(96, 165, 250, 0.05) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(70px)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Left Column: Interactive Flow Showcase with Frosted Glass Panel */}
+      {/* Left Column: Flow with Big 3D Clay Icons & Frozen Glass Background */}
       <div
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{
           background: 'transparent',
           borderRight: '1px solid var(--notion-border)',
-          padding: '44px 52px',
+          padding: '40px 48px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -657,24 +224,24 @@ export const AuthView: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Frosted Glass Showcase Container */}
+        {/* Center: Frosted Glass Showcase Panel with Big 3D Clay Icon */}
         <div 
           className="frozen-glass-panel"
           style={{
-            maxWidth: '540px',
+            maxWidth: '520px',
             width: '100%',
-            margin: '28px 0',
-            borderRadius: '20px',
-            padding: '36px 36px 32px',
+            margin: '24px 0',
+            borderRadius: '24px',
+            padding: '32px 36px',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          {/* Slide Category Tag */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+          {/* Top Tag & Counter */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
             <span 
               style={{
-                fontSize: '0.7rem',
+                fontSize: '0.68rem',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
                 color: 'var(--lilac-400)',
@@ -692,20 +259,68 @@ export const AuthView: React.FC = () => {
             </span>
           </div>
 
-          {/* Big 3D Avatar / Visual Area with Subtle Animation */}
-          <div key={`visual-${currentSlide.id}`} className="animate-slide-in">
-            {currentSlide.renderVisual()}
+          {/* Big Stylized 3D Clay Icon Centerpiece */}
+          <div 
+            key={`clay-visual-${currentSlide.id}`} 
+            className="animate-slide-in"
+            style={{ 
+              position: 'relative', 
+              height: '210px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              margin: '8px 0 16px'
+            }}
+          >
+            {/* Ambient Radial Colored Glow beneath the 3D clay icon */}
+            <div 
+              style={{
+                position: 'absolute',
+                width: '180px',
+                height: '180px',
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${currentSlide.glowColor} 0%, rgba(0, 0, 0, 0) 70%)`,
+                filter: 'blur(28px)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* The Big 3D Clay Icon Image */}
+            <div 
+              className="animate-float"
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img 
+                src={currentSlide.imageSrc} 
+                alt={currentSlide.title}
+                style={{
+                  width: '185px',
+                  height: '185px',
+                  objectFit: 'contain',
+                  mixBlendMode: 'screen',
+                  filter: 'drop-shadow(0 20px 35px rgba(0, 0, 0, 0.7))',
+                  userSelect: 'none',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
           </div>
 
-          {/* Text Point (One at a time) */}
+          {/* Clean Headline & Copy (One Point at a Time) */}
           <div 
-            key={`text-${currentSlide.id}`} 
+            key={`clay-text-${currentSlide.id}`} 
             className="animate-slide-in"
-            style={{ marginTop: '24px', minHeight: '110px' }}
+            style={{ minHeight: '96px', textAlign: 'left' }}
           >
             <h2
               style={{
-                fontSize: '1.38rem',
+                fontSize: '1.34rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 lineHeight: 1.25,
@@ -726,14 +341,14 @@ export const AuthView: React.FC = () => {
             </p>
           </div>
 
-          {/* Dots Navigation & Arrow Controls */}
+          {/* Dots Navigation on the Bottom & Controls */}
           <div 
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginTop: '20px',
-              paddingTop: '18px',
+              marginTop: '16px',
+              paddingTop: '16px',
               borderTop: '1px solid var(--notion-border)',
             }}
           >
@@ -810,7 +425,7 @@ export const AuthView: React.FC = () => {
             fontSize: '0.74rem',
             color: 'var(--text-muted)',
             borderTop: '1px solid var(--notion-border)',
-            paddingTop: '18px',
+            paddingTop: '16px',
           }}
         >
           <span>Multi-Tenant Architecture</span>
