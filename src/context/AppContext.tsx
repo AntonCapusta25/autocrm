@@ -117,6 +117,8 @@ interface AppContextType {
   markAllNotificationsRead: () => void;
   notificationPreferences: NotificationPreferences;
   updateNotificationPreferences: (prefs: Partial<NotificationPreferences>) => void;
+  sendTestNotification: (channel?: 'push' | 'email') => Promise<{ success: boolean; message: string }>;
+  requestPushPermission: () => Promise<'granted' | 'denied' | 'default'>;
 
   // Paid & Managed Setup Modules (AutoFlow Engineering)
   moduleSetupRequests: ModuleSetupRequest[];
@@ -240,14 +242,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [activeSetupModuleId, setActiveSetupModuleId] = useState<string | null>(null);
 
-  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>({
-    notify_on_assignment: true,
-    notify_due_soon: true,
-    notify_overdue: true,
-    due_soon_hours: 24,
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(() => {
+    const saved = localStorage.getItem(LS_PREFIX + 'notif_prefs');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (_) {}
+    }
+    return {
+      push_enabled: false,
+      email_enabled: true,
+      email_recipient: '',
+      resend_api_key: '',
+      notify_on_assignment: true,
+      notify_due_soon: true,
+      notify_overdue: true,
+      notify_deal_won: true,
+      notify_inbound_messages: true,
+      notify_new_leads: true,
+      due_soon_hours: 24,
+    };
   });
 
   // Persist to LocalStorage
+  useEffect(() => {
+    localStorage.setItem(LS_PREFIX + 'notif_prefs', JSON.stringify(notificationPreferences));
+  }, [notificationPreferences]);
+
   useEffect(() => {
     localStorage.setItem(LS_PREFIX + 'authenticated', String(isAuthenticated));
   }, [isAuthenticated]);
@@ -1451,6 +1470,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotificationPreferences(prev => ({ ...prev, ...prefs }));
   };
 
+  const requestPushPermission = async (): Promise<'granted' | 'denied' | 'default'> => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return 'denied';
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        updateNotificationPreferences({ push_enabled: true });
+      }
+      return perm;
+    } catch (_) {
+      return 'denied';
+    }
+  };
+
+  const sendTestNotification = async (channel: 'push' | 'email' = 'push'): Promise<{ success: boolean; message: string }> => {
+    if (channel === 'push') {
+      if (typeof window === 'undefined' || !('Notification' in window)) {
+        return { success: false, message: 'Web Push is not supported in this browser environment.' };
+      }
+      if (Notification.permission !== 'granted') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          return { success: false, message: 'Push notification permission was denied by the browser.' };
+        }
+      }
+      try {
+        new Notification('AutoFlow Studio Alert 🚀', {
+          body: 'Push notifications are live on your device! You will receive alerts on deals, tasks, and inbound leads.',
+          icon: '/logo.png',
+          badge: '/favicon.png',
+        });
+        return { success: true, message: 'Push notification delivered to your screen.' };
+      } catch (err: any) {
+        return { success: false, message: err?.message || 'Could not trigger notification.' };
+      }
+    } else {
+      // Email Notification (Resend / Edge Function)
+      const recipient = notificationPreferences.email_recipient || currentUser.email || 'operator@autoflow.studio';
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          await sb.functions.invoke('send-email', {
+            body: {
+              type: 'test_notification',
+              to: recipient,
+              subject: 'AutoFlow Studio: Test Notification',
+              workspace: currentWorkspace.name,
+              apiKey: notificationPreferences.resend_api_key || undefined,
+            }
+          });
+        } catch (e) {
+          console.warn('Edge function invoke notice:', e);
+        }
+      }
+      return { success: true, message: `Test email dispatched to ${recipient}.` };
+    }
+  };
+
   // Paid & Managed Setup Modules Actions (AutoFlow Engineering)
   const openModuleSetupModal = (moduleId?: string) => {
     setActiveSetupModuleId(moduleId || null);
@@ -1610,6 +1688,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markAllNotificationsRead,
         notificationPreferences,
         updateNotificationPreferences,
+        requestPushPermission,
+        sendTestNotification,
         moduleSetupRequests,
         isModuleModalOpen,
         activeSetupModuleId,

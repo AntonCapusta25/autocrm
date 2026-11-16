@@ -684,3 +684,4 @@ export const PaidModuleRequestModal: React.FC<PaidModuleRequestModalProps> = ({
     </div>
   );
 };
+

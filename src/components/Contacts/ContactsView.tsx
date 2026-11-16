@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { ContactModal } from './ContactModal';
 import { ContactDetailDrawer } from './ContactDetailDrawer';
-import { CSVImportModal } from './CSVImportModal';
+import { DataTransferModal } from '../ImportExport/DataTransferModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
 
 interface ContactsViewProps {
@@ -393,7 +393,12 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
       )}
 
       {csvModalOpen && (
-        <CSVImportModal onClose={() => setCsvModalOpen(false)} />
+        <DataTransferModal 
+          isOpen={csvModalOpen}
+          onClose={() => setCsvModalOpen(false)}
+          initialMode="import"
+          initialEntity="contacts"
+        />
       )}
 
       {drawerContact && (

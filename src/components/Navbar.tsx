@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Bell, CheckCircle2, ChevronDown, 
-  Plus, Sparkles, ChevronRight, LogOut
+  Plus, Sparkles, ChevronRight, LogOut,
+  Smartphone, Upload, HelpCircle
 } from 'lucide-react';
 import { NavTab } from './Sidebar';
 
@@ -10,6 +11,9 @@ interface NavbarProps {
   activeTab: NavTab;
   onOpenNotifications: () => void;
   onOpenOnboarding: () => void;
+  onOpenMobile?: () => void;
+  onOpenDataTransfer?: () => void;
+  onOpenTour?: () => void;
 }
 
 const TAB_TITLES: Record<NavTab, { title: string; category: string }> = {
@@ -28,7 +32,10 @@ const TAB_TITLES: Record<NavTab, { title: string; category: string }> = {
 export const Navbar: React.FC<NavbarProps> = ({ 
   activeTab, 
   onOpenNotifications,
-  onOpenOnboarding
+  onOpenOnboarding,
+  onOpenMobile,
+  onOpenDataTransfer,
+  onOpenTour,
 }) => {
   const { 
     currentWorkspace, workspaces, createWorkspace, switchWorkspace,
@@ -156,7 +163,47 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right: Actions, Notifications, User */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Try on Mobile PWA Button */}
+          {onOpenMobile && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={onOpenMobile}
+              style={{ fontSize: '0.74rem', gap: '5px', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)' }}
+              title="Install Web App on Phone & Configure Push Notifications"
+            >
+              <Smartphone size={13} />
+              <span>Try on Mobile</span>
+            </button>
+          )}
+
+          {/* Import / Export Center Button */}
+          {onOpenDataTransfer && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={onOpenDataTransfer}
+              style={{ padding: '6px', color: 'var(--text-secondary)' }}
+              title="Import / Export Center"
+            >
+              <Upload size={14} />
+            </button>
+          )}
+
+          {/* Workspace Product Tour Button */}
+          {onOpenTour && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={onOpenTour}
+              style={{ padding: '6px', color: 'var(--text-secondary)' }}
+              title="Workspace Guided Tour"
+            >
+              <HelpCircle size={14} />
+            </button>
+          )}
+
           {/* Reconfigure CRM Quick Pill */}
           <button
             type="button"

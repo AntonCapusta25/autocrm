@@ -436,3 +436,4 @@ export const ModulesMarketplaceModal: React.FC<ModulesMarketplaceModalProps> = (
     </div>
   );
 };
+

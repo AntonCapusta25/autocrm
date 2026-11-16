@@ -122,9 +122,19 @@ export interface AppNotification {
 }
 
 export interface NotificationPreferences {
+  // Push & Email Delivery Channels
+  push_enabled: boolean;
+  email_enabled: boolean;
+  email_recipient?: string;
+  resend_api_key?: string;
+
+  // Event Triggers
   notify_on_assignment: boolean;
   notify_due_soon: boolean;
   notify_overdue: boolean;
+  notify_deal_won: boolean;
+  notify_inbound_messages: boolean;
+  notify_new_leads: boolean;
   due_soon_hours: number;
 }
 

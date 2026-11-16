@@ -3,7 +3,8 @@ import { useApp } from '../context/AppContext';
 import { 
   LayoutDashboard, Users, Building2, KanbanSquare, 
   CheckSquare, ShieldCheck, Zap, MessageSquare, 
-  Calendar, FileText, Sparkles, Sliders
+  Calendar, FileText, Sparkles, Sliders, Smartphone,
+  Upload, HelpCircle
 } from 'lucide-react';
 
 export type NavTab = 
@@ -23,6 +24,9 @@ interface SidebarProps {
   onTabChange: (tab: NavTab) => void;
   onOpenOnboarding: () => void;
   onOpenMarketplace?: () => void;
+  onOpenMobile?: () => void;
+  onOpenDataTransfer?: () => void;
+  onOpenTour?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -30,6 +34,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onTabChange, 
   onOpenOnboarding,
   onOpenMarketplace,
+  onOpenMobile,
+  onOpenDataTransfer,
+  onOpenTour,
 }) => {
   const { 
     currentWorkspace, contacts, companies, opportunities, 
@@ -262,6 +269,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Modules & Add-ons</span>
           </div>
           <span className="notion-badge lilac" style={{ fontSize: '0.66rem' }}>✨ Enterprise</span>
+        </button>
+
+        <button 
+          className="notion-nav-item"
+          onClick={onOpenDataTransfer}
+        >
+          <div className="notion-nav-left">
+            <Upload size={15} />
+            <span>Import & Export</span>
+          </div>
+          <span className="notion-badge" style={{ fontSize: '0.66rem' }}>CSV</span>
+        </button>
+
+        <button 
+          className="notion-nav-item"
+          onClick={onOpenMobile}
+          style={{ color: '#60a5fa' }}
+        >
+          <div className="notion-nav-left">
+            <Smartphone size={15} style={{ color: '#60a5fa' }} />
+            <span>Try on Mobile (PWA)</span>
+          </div>
+          <span className="notion-badge" style={{ fontSize: '0.66rem', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)' }}>📱 Mobile</span>
         </button>
       </div>
 

@@ -20,12 +20,16 @@ import { OpportunityModal } from './components/Pipeline/OpportunityModal';
 import { AuthView } from './components/Auth/AuthView';
 import { PaidModuleRequestModal } from './components/Modules/PaidModuleRequestModal';
 import { ModulesMarketplaceModal } from './components/Modules/ModulesMarketplaceModal';
+import { DataTransferModal } from './components/ImportExport/DataTransferModal';
+import { WorkspaceIntroTourModal } from './components/Onboarding/WorkspaceIntroTourModal';
+import { TryOnMobileModal } from './components/Mobile/TryOnMobileModal';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
   const { 
     isAuthenticated, isOnboardingOpen, setIsOnboardingOpen, isModuleEnabled,
-    isModuleModalOpen, activeSetupModuleId, openModuleSetupModal, closeModuleSetupModal 
+    isModuleModalOpen, activeSetupModuleId, openModuleSetupModal, closeModuleSetupModal,
+    currentWorkspace
   } = useApp();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
 
@@ -35,6 +39,20 @@ const MainAppContent: React.FC = () => {
   const [quickTaskModalOpen, setQuickTaskModalOpen] = useState(false);
   const [quickDealModalOpen, setQuickDealModalOpen] = useState(false);
   const [marketplaceModalOpen, setMarketplaceModalOpen] = useState(false);
+  const [dataTransferModalOpen, setDataTransferModalOpen] = useState(false);
+  const [mobileModalOpen, setMobileModalOpen] = useState(false);
+  const [tourModalOpen, setTourModalOpen] = useState(false);
+
+  // Auto-launch workspace education tour once per workspace
+  React.useEffect(() => {
+    if (isAuthenticated && currentWorkspace?.id) {
+      const tourKey = `autoflow_tour_seen_${currentWorkspace.id}`;
+      const seen = localStorage.getItem(tourKey);
+      if (!seen) {
+        setTourModalOpen(true);
+      }
+    }
+  }, [isAuthenticated, currentWorkspace?.id]);
 
   // Pre-selected entities for task modal
   const [taskInitialContact, setTaskInitialContact] = useState<Contact | null>(null);
@@ -73,6 +91,9 @@ const MainAppContent: React.FC = () => {
         onTabChange={(tab) => setActiveTab(tab)} 
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+        onOpenMobile={() => setMobileModalOpen(true)}
+        onOpenDataTransfer={() => setDataTransferModalOpen(true)}
+        onOpenTour={() => setTourModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -81,6 +102,9 @@ const MainAppContent: React.FC = () => {
           activeTab={activeTab}
           onOpenNotifications={() => setNotifDrawerOpen(true)}
           onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          onOpenMobile={() => setMobileModalOpen(true)}
+          onOpenDataTransfer={() => setDataTransferModalOpen(true)}
+          onOpenTour={() => setTourModalOpen(true)}
         />
 
         <main className="content-viewport">
@@ -199,6 +223,32 @@ const MainAppContent: React.FC = () => {
         isOpen={isModuleModalOpen}
         onClose={closeModuleSetupModal}
         initialModuleId={activeSetupModuleId}
+      />
+
+      {/* CSV Data Transfer Center (Import & Export with 3D Auth-Style Instructions) */}
+      <DataTransferModal 
+        isOpen={dataTransferModalOpen}
+        onClose={() => setDataTransferModalOpen(false)}
+        initialMode="import"
+        initialEntity="contacts"
+      />
+
+      {/* Workspace Education & Product Tour Popover */}
+      <WorkspaceIntroTourModal 
+        isOpen={tourModalOpen}
+        onClose={() => {
+          setTourModalOpen(false);
+          if (currentWorkspace?.id) {
+            localStorage.setItem(`autoflow_tour_seen_${currentWorkspace.id}`, 'true');
+          }
+        }}
+        onOpenMobileGuide={() => setMobileModalOpen(true)}
+      />
+
+      {/* Try on Mobile & PWA Setup Flow */}
+      <TryOnMobileModal 
+        isOpen={mobileModalOpen}
+        onClose={() => setMobileModalOpen(false)}
       />
     </div>
   );

@@ -3,10 +3,11 @@ import { useApp } from '../../context/AppContext';
 import { Task, TaskPriority, TaskStatus, NotionDatabaseView } from '../../types';
 import { 
   CheckSquare, Search, Plus, Filter, Calendar, AlertTriangle, 
-  Clock, CheckCircle, User, Building2, Trash2, Edit, Check
+  Clock, CheckCircle, User, Building2, Trash2, Edit, Check, Upload
 } from 'lucide-react';
 import { TaskModal } from './TaskModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
+import { DataTransferModal } from '../ImportExport/DataTransferModal';
 
 type TaskFilterTab = 'all' | 'my_tasks' | 'today' | 'upcoming' | 'overdue' | 'completed';
 
@@ -30,6 +31,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
   const [modalOpen, setModalOpen] = useState(initialTaskModalOpen);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [transferOpen, setTransferOpen] = useState(false);
 
   React.useEffect(() => {
     if (initialTaskModalOpen) {
@@ -110,15 +112,26 @@ export const TasksView: React.FC<TasksViewProps> = ({
           </p>
         </div>
 
-        <button 
-          className="btn btn-lilac"
-          onClick={() => {
-            setEditingTask(null);
-            setModalOpen(true);
-          }}
-        >
-          <Plus size={14} /> New Task
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => setTransferOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Upload size={13} /> Import / Export Tasks
+          </button>
+
+          <button 
+            className="btn btn-lilac"
+            onClick={() => {
+              setEditingTask(null);
+              setModalOpen(true);
+            }}
+          >
+            <Plus size={14} /> New Task
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs Pills (My Tasks, Today, Overdue, Upcoming, Completed) */}
@@ -378,6 +391,15 @@ export const TasksView: React.FC<TasksViewProps> = ({
             setModalOpen(false);
             setEditingTask(null);
           }}
+        />
+      )}
+
+      {transferOpen && (
+        <DataTransferModal 
+          isOpen={transferOpen}
+          onClose={() => setTransferOpen(false)}
+          initialMode="import"
+          initialEntity="tasks"
         />
       )}
     </div>

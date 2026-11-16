@@ -768,3 +768,31 @@ body {
 .animate-slide-in {
   animation: shimmerSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ─── Mobile Native Polish & PWA Touch Rules (mobile-native) ─── */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overscroll-behavior-y: none;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+}
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
