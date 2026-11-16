@@ -20,7 +20,7 @@ const SLIDES: SlideItem[] = [
     tag: 'PIPELINE VELOCITY',
     title: 'Intelligent Deal Tracking & Revenue Forecasting',
     description: 'Track deal movements from initial inquiry to closed-won with automated stage velocity and real-time revenue analytics.',
-    imageSrc: '/assets/clay/chart.jpg',
+    imageSrc: '/assets/clay/chart.png',
     glowColor: 'rgba(167, 139, 250, 0.35)',
   },
   {
@@ -28,7 +28,7 @@ const SLIDES: SlideItem[] = [
     tag: 'AUTONOMOUS WORKFLOWS',
     title: 'Self-Executing Triggers & Automation Chains',
     description: 'Deploy multi-step event triggers, automated lead routing, follow-up sequences, and instant webhook dispatches.',
-    imageSrc: '/assets/clay/lightning.jpg',
+    imageSrc: '/assets/clay/lightning.png',
     glowColor: 'rgba(196, 181, 253, 0.4)',
   },
   {
@@ -36,7 +36,7 @@ const SLIDES: SlideItem[] = [
     tag: 'OMNICHANNEL MESSAGING',
     title: 'Unified Customer Stream & Speed-to-Lead',
     description: 'Consolidate every lead touchpoint across SMS, WhatsApp, and email into one synchronized stream with instant contact timeline records.',
-    imageSrc: '/assets/clay/chat.jpg',
+    imageSrc: '/assets/clay/chat.png',
     glowColor: 'rgba(96, 165, 250, 0.35)',
   },
   {
@@ -44,7 +44,7 @@ const SLIDES: SlideItem[] = [
     tag: 'WORKSPACE & PLAYBOOKS',
     title: 'Multi-View Databases & Executive Playbooks',
     description: 'Switch between Table, Kanban Board, Calendar, and interactive document SOPs with complete workspace data isolation.',
-    imageSrc: '/assets/clay/docs.jpg',
+    imageSrc: '/assets/clay/docs.png',
     glowColor: 'rgba(52, 211, 153, 0.3)',
   },
 ];
@@ -266,8 +266,7 @@ export const AuthView: React.FC = () => {
                   width: '220px',
                   height: '220px',
                   objectFit: 'contain',
-                  mixBlendMode: 'screen',
-                  filter: 'drop-shadow(0 25px 40px rgba(0, 0, 0, 0.85))',
+                  filter: 'drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6))',
                   userSelect: 'none',
                   pointerEvents: 'none',
                 }}
