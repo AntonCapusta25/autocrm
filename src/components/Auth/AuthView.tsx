@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Building2, Mail, Lock, User, ArrowRight, AlertCircle, 
-  Layers, ChevronLeft, ChevronRight
+  Layers
 } from 'lucide-react';
 
 interface SlideItem {
@@ -21,7 +21,7 @@ const SLIDES: SlideItem[] = [
     title: 'Intelligent Deal Tracking & Revenue Forecasting',
     description: 'Track deal movements from initial inquiry to closed-won with automated stage velocity and real-time revenue analytics.',
     imageSrc: '/assets/clay/chart.jpg',
-    glowColor: 'rgba(167, 139, 250, 0.28)',
+    glowColor: 'rgba(167, 139, 250, 0.35)',
   },
   {
     id: 'workflows',
@@ -29,7 +29,7 @@ const SLIDES: SlideItem[] = [
     title: 'Self-Executing Triggers & Automation Chains',
     description: 'Deploy multi-step event triggers, automated lead routing, follow-up sequences, and instant webhook dispatches.',
     imageSrc: '/assets/clay/lightning.jpg',
-    glowColor: 'rgba(196, 181, 253, 0.3)',
+    glowColor: 'rgba(196, 181, 253, 0.4)',
   },
   {
     id: 'inbox',
@@ -37,7 +37,7 @@ const SLIDES: SlideItem[] = [
     title: 'Unified Customer Stream & Speed-to-Lead',
     description: 'Consolidate every lead touchpoint across SMS, WhatsApp, and email into one synchronized stream with instant contact timeline records.',
     imageSrc: '/assets/clay/chat.jpg',
-    glowColor: 'rgba(96, 165, 250, 0.25)',
+    glowColor: 'rgba(96, 165, 250, 0.35)',
   },
   {
     id: 'docs',
@@ -45,7 +45,7 @@ const SLIDES: SlideItem[] = [
     title: 'Multi-View Databases & Executive Playbooks',
     description: 'Switch between Table, Kanban Board, Calendar, and interactive document SOPs with complete workspace data isolation.',
     imageSrc: '/assets/clay/docs.jpg',
-    glowColor: 'rgba(52, 211, 153, 0.22)',
+    glowColor: 'rgba(52, 211, 153, 0.3)',
   },
 ];
 
@@ -75,14 +75,6 @@ export const AuthView: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [isPaused]);
-
-  const handlePrevSlide = () => {
-    setActiveSlideIndex(prev => (prev - 1 + SLIDES.length) % SLIDES.length);
-  };
-
-  const handleNextSlide = () => {
-    setActiveSlideIndex(prev => (prev + 1) % SLIDES.length);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,22 +118,22 @@ export const AuthView: React.FC = () => {
         background: 'var(--notion-deep-black)',
         color: 'var(--text-main)',
         display: 'grid',
-        gridTemplateColumns: '1.12fr 0.88fr',
+        gridTemplateColumns: '1.15fr 0.85fr',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Ambient background light orbs for frosted glass depth */}
+      {/* Background Ambient Glows for Frozen Glass Sheen */}
       <div 
         style={{
           position: 'absolute',
-          top: '-15%',
-          left: '8%',
-          width: '550px',
-          height: '550px',
+          top: '-20%',
+          left: '5%',
+          width: '600px',
+          height: '600px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(70px)',
+          background: 'radial-gradient(circle, rgba(167, 139, 250, 0.18) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(80px)',
           pointerEvents: 'none',
         }}
       />
@@ -149,24 +141,23 @@ export const AuthView: React.FC = () => {
         style={{
           position: 'absolute',
           bottom: '-15%',
-          left: '25%',
-          width: '500px',
-          height: '500px',
+          left: '20%',
+          width: '550px',
+          height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, rgba(0, 0, 0, 0) 70%)',
-          filter: 'blur(70px)',
+          background: 'radial-gradient(circle, rgba(96, 165, 250, 0.14) 0%, rgba(0, 0, 0, 0) 70%)',
+          filter: 'blur(80px)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Left Column: Flow with Big 3D Clay Icons & Frozen Glass Background */}
+      {/* Left Column: Heavy Frozen Glass Panel with Centered 3D Clay Icon, Text, and Animated Dots */}
       <div
+        className="frozen-glass-pane"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{
-          background: 'transparent',
-          borderRight: '1px solid var(--notion-border)',
-          padding: '40px 48px',
+          padding: '44px 56px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -174,113 +165,85 @@ export const AuthView: React.FC = () => {
           zIndex: 1,
         }}
       >
-        {/* Brand Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: 'var(--lilac-bg-subtle)',
-                border: '1px solid var(--lilac-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--lilac-300)',
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                boxShadow: '0 0 15px rgba(167, 139, 250, 0.2)',
-              }}
-            >
-              A
-            </div>
-            <div>
-              <span style={{ fontWeight: 700, fontSize: '0.98rem', letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
-                AutoFlow Studio
-              </span>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                Multi-Tenant CRM & Operations
-              </div>
-            </div>
-          </div>
-
-          <div 
+        {/* Brand Header with Official AutoFlow Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 2 }}>
+          <img 
+            src="/logo.webp" 
+            alt="AutoFlow Studio" 
             style={{
-              fontSize: '0.72rem',
-              color: 'var(--lilac-300)',
-              background: 'var(--lilac-bg-subtle)',
-              border: '1px solid var(--lilac-border)',
-              padding: '4px 10px',
-              borderRadius: '20px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
+              width: '32px',
+              height: '32px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 12px rgba(167, 139, 250, 0.4))',
             }}
-          >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} />
-            Active Architecture
+            onError={(e) => {
+              // Fallback to png if webp not supported
+              (e.currentTarget as HTMLImageElement).src = '/logo.png';
+            }}
+          />
+          <div>
+            <span style={{ fontWeight: 700, fontSize: '0.98rem', letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
+              AutoFlow Studio
+            </span>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              Multi-Tenant CRM & Operations
+            </div>
           </div>
         </div>
 
-        {/* Center: Frosted Glass Showcase Panel with Big 3D Clay Icon */}
-        <div 
-          className="frozen-glass-panel"
+        {/* Center: NO BOXES! Just Big 3D Clay Icon, Text, and Animated Steps/Dots */}
+        <div
           style={{
-            maxWidth: '520px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            maxWidth: '480px',
+            margin: '0 auto',
             width: '100%',
-            margin: '24px 0',
-            borderRadius: '24px',
-            padding: '32px 36px',
             position: 'relative',
-            overflow: 'hidden',
+            zIndex: 2,
           }}
         >
-          {/* Top Tag & Counter */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+          {/* Tag */}
+          <div style={{ marginBottom: '14px' }}>
             <span 
               style={{
-                fontSize: '0.68rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
-                letterSpacing: '0.08em',
-                color: 'var(--lilac-400)',
-                background: 'var(--lilac-bg-subtle)',
-                border: '1px solid var(--lilac-border)',
-                padding: '3px 8px',
-                borderRadius: '4px',
+                letterSpacing: '0.1em',
+                color: 'var(--lilac-300)',
+                textTransform: 'uppercase',
+                opacity: 0.9,
               }}
             >
               {currentSlide.tag}
             </span>
-
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-              0{activeSlideIndex + 1} / 0{SLIDES.length}
-            </span>
           </div>
 
-          {/* Big Stylized 3D Clay Icon Centerpiece */}
+          {/* Big 3D Clay Icon (No Box Around It) */}
           <div 
-            key={`clay-visual-${currentSlide.id}`} 
+            key={`clay-icon-${currentSlide.id}`}
             className="animate-slide-in"
             style={{ 
               position: 'relative', 
-              height: '210px', 
+              width: '240px',
+              height: '240px', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
-              margin: '8px 0 16px'
+              margin: '0 0 20px',
             }}
           >
             {/* Ambient Radial Colored Glow beneath the 3D clay icon */}
             <div 
               style={{
                 position: 'absolute',
-                width: '180px',
-                height: '180px',
+                width: '210px',
+                height: '210px',
                 borderRadius: '50%',
                 background: `radial-gradient(circle, ${currentSlide.glowColor} 0%, rgba(0, 0, 0, 0) 70%)`,
-                filter: 'blur(28px)',
+                filter: 'blur(36px)',
                 pointerEvents: 'none',
               }}
             />
@@ -300,11 +263,11 @@ export const AuthView: React.FC = () => {
                 src={currentSlide.imageSrc} 
                 alt={currentSlide.title}
                 style={{
-                  width: '185px',
-                  height: '185px',
+                  width: '220px',
+                  height: '220px',
                   objectFit: 'contain',
                   mixBlendMode: 'screen',
-                  filter: 'drop-shadow(0 20px 35px rgba(0, 0, 0, 0.7))',
+                  filter: 'drop-shadow(0 25px 40px rgba(0, 0, 0, 0.85))',
                   userSelect: 'none',
                   pointerEvents: 'none',
                 }}
@@ -312,107 +275,68 @@ export const AuthView: React.FC = () => {
             </div>
           </div>
 
-          {/* Clean Headline & Copy (One Point at a Time) */}
+          {/* Text Below */}
           <div 
-            key={`clay-text-${currentSlide.id}`} 
+            key={`clay-text-${currentSlide.id}`}
             className="animate-slide-in"
-            style={{ minHeight: '96px', textAlign: 'left' }}
+            style={{ marginBottom: '28px' }}
           >
             <h2
               style={{
-                fontSize: '1.34rem',
+                fontSize: '1.45rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 lineHeight: 1.25,
                 color: 'var(--text-main)',
-                marginBottom: '8px',
+                marginBottom: '10px',
               }}
             >
               {currentSlide.title}
             </h2>
             <p
               style={{
-                fontSize: '0.86rem',
+                fontSize: '0.88rem',
                 color: 'var(--text-secondary)',
-                lineHeight: 1.55,
+                lineHeight: 1.6,
+                maxWidth: '430px',
+                margin: '0 auto',
               }}
             >
               {currentSlide.description}
             </p>
           </div>
 
-          {/* Dots Navigation on the Bottom & Controls */}
+          {/* Animated Steps / Dots Below */}
           <div 
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: '16px',
-              paddingTop: '16px',
-              borderTop: '1px solid var(--notion-border)',
+              justifyContent: 'center',
+              gap: '10px',
             }}
           >
-            {/* Dots */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {SLIDES.map((slide, idx) => {
-                const isActive = idx === activeSlideIndex;
-                return (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => setActiveSlideIndex(idx)}
-                    title={slide.title}
-                    style={{
-                      height: '7px',
-                      width: isActive ? '28px' : '7px',
-                      borderRadius: '4px',
-                      background: isActive ? 'var(--lilac-400)' : 'rgba(255, 255, 255, 0.18)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                      padding: 0,
-                      boxShadow: isActive ? '0 0 10px rgba(167, 139, 250, 0.5)' : 'none',
-                    }}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Prev / Next controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={handlePrevSlide}
-                className="btn btn-ghost btn-icon btn-sm"
-                title="Previous feature"
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--notion-border)',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={handleNextSlide}
-                className="btn btn-ghost btn-icon btn-sm"
-                title="Next feature"
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--notion-border)',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            {SLIDES.map((slide, idx) => {
+              const isActive = idx === activeSlideIndex;
+              return (
+                <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => setActiveSlideIndex(idx)}
+                  title={slide.title}
+                  style={{
+                    height: '6px',
+                    width: isActive ? '36px' : '6px',
+                    borderRadius: '4px',
+                    background: isActive ? 'var(--lilac-400)' : 'rgba(255, 255, 255, 0.22)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                    padding: 0,
+                    boxShadow: isActive ? '0 0 12px rgba(167, 139, 250, 0.65)' : 'none',
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -424,8 +348,8 @@ export const AuthView: React.FC = () => {
             justifyContent: 'space-between',
             fontSize: '0.74rem',
             color: 'var(--text-muted)',
-            borderTop: '1px solid var(--notion-border)',
-            paddingTop: '16px',
+            position: 'relative',
+            zIndex: 2,
           }}
         >
           <span>Multi-Tenant Architecture</span>

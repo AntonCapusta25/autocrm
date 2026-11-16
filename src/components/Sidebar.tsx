@@ -267,6 +267,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
           <Sparkles size={13} style={{ color: 'var(--lilac-400)' }} />
           <span>Customize CRM ({onboardingConfig.industry.split(' ')[0]})</span>
         </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', padding: '2px 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <img 
+              src="/logo.webp" 
+              alt="AutoFlow" 
+              style={{ width: '14px', height: '14px', objectFit: 'contain' }} 
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/logo.png'; }} 
+            />
+            <span>AutoFlow Studio</span>
+          </div>
+          <span style={{ opacity: 0.6 }}>v2.0</span>
+        </div>
       </div>
     </aside>
   );
