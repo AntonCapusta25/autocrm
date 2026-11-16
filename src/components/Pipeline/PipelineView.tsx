@@ -96,8 +96,12 @@ export const PipelineView: React.FC = () => {
       {/* Top Header with Value Metrics */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.4rem' }}>📊</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img 
+              src="/assets/clay/chart.png" 
+              alt="Sales Pipeline" 
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+            />
             <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               Sales Pipeline & Deal Flow
             </h1>

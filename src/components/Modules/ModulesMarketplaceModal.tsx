@@ -15,11 +15,23 @@ interface ModulesMarketplaceModalProps {
 }
 
 const PAID_ICONS: Record<string, React.ReactNode> = {
-  ai_voice: <PhoneCall size={20} style={{ color: '#a78bfa' }} />,
-  whatsapp_cloud: <MessageCircle size={20} style={{ color: '#34d399' }} />,
-  custom_erp: <Database size={20} style={{ color: '#60a5fa' }} />,
-  custom_agents: <Bot size={20} style={{ color: '#c084fc' }} />,
-  lead_scraping: <Target size={20} style={{ color: '#f472b6' }} />,
+  ai_voice: <img src="/assets/clay/voice.png" alt="AI Voice" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />,
+  whatsapp_cloud: <img src="/assets/clay/chat.png" alt="WhatsApp Cloud" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />,
+  custom_erp: <img src="/assets/clay/companies.png" alt="Custom ERP" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />,
+  custom_agents: <img src="/assets/clay/docs.png" alt="Custom AI Agents" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />,
+  lead_scraping: <img src="/assets/clay/chart.png" alt="Lead Scraping" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />,
+};
+
+const CORE_ICONS: Record<string, string> = {
+  contacts: '/assets/clay/contacts.png',
+  companies: '/assets/clay/companies.png',
+  pipeline: '/assets/clay/chart.png',
+  workflows: '/assets/clay/lightning.png',
+  conversations: '/assets/clay/chat.png',
+  calendar: '/assets/clay/calendar.png',
+  docs: '/assets/clay/docs.png',
+  tasks: '/assets/clay/tasks.png',
+  team: '/assets/clay/shield.png',
 };
 
 export const ModulesMarketplaceModal: React.FC<ModulesMarketplaceModalProps> = ({
@@ -336,9 +348,18 @@ export const ModulesMarketplaceModal: React.FC<ModulesMarketplaceModalProps> = (
                   >
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                          {mod.name}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {CORE_ICONS[mod.id] && (
+                            <img 
+                              src={CORE_ICONS[mod.id]} 
+                              alt="" 
+                              style={{ width: '20px', height: '20px', objectFit: 'contain' }} 
+                            />
+                          )}
+                          <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                            {mod.name}
+                          </span>
+                        </div>
                         <span 
                           className={`notion-badge ${isEnabled ? 'green' : ''}`}
                           style={{ fontSize: '0.68rem' }}

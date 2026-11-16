@@ -86,18 +86,21 @@ export const TryOnMobileModal: React.FC<TryOnMobileModalProps> = ({ isOpen, onCl
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div 
               style={{
-                width: '34px',
-                height: '34px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '8px',
                 background: 'rgba(167, 139, 250, 0.12)',
                 border: '1px solid rgba(167, 139, 250, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--lilac-300)',
               }}
             >
-              <Smartphone size={17} />
+              <img 
+                src="/assets/clay/lightning.png" 
+                alt="PWA Mobile" 
+                style={{ width: '24px', height: '24px', objectFit: 'contain' }} 
+              />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -402,3 +405,4 @@ export const TryOnMobileModal: React.FC<TryOnMobileModalProps> = ({ isOpen, onCl
     </div>
   );
 };
+

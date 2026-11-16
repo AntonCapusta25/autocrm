@@ -24,7 +24,7 @@ const TOUR_SLIDES: TourSlide[] = [
     tag: 'WORKSPACE ARCHITECTURE',
     title: 'Your Executive Notion-Style CRM is Live',
     description: 'A dark obsidian, distraction-free command center for your entire revenue operation. Switch instantly between Table, Kanban Board, Calendar, and SOP Documents.',
-    imageSrc: '/assets/clay/docs.png',
+    imageSrc: '/assets/clay/dashboard.png',
     glowColor: 'rgba(167, 139, 250, 0.4)',
   },
   {

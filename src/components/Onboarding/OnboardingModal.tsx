@@ -14,12 +14,12 @@ interface OnboardingModalProps {
 }
 
 const ROLES = [
-  { id: 'Founder & CEO', label: 'Founder & CEO', desc: 'Holistic revenue, high-level reporting & vision', icon: '🚀' },
-  { id: 'Head of Sales', label: 'Head of Sales / VP Revenue', desc: 'Pipelines, closing velocity & deal quotas', icon: '📈' },
-  { id: 'Marketing Lead', label: 'Marketing & Growth Director', desc: 'Lead generation, campaigns & inbox intake', icon: '🎯' },
-  { id: 'Operations Lead', label: 'Operations & RevOps', desc: 'Process automation, webhooks & team SOPs', icon: '⚙️' },
-  { id: 'Agency Owner', label: 'Agency Owner / Partner', desc: 'Client onboarding, retainers & deliverables', icon: '🎨' },
-  { id: 'Consultant', label: 'Independent Consultant / Practice', desc: 'Client advisory, bookings & project wiki', icon: '💡' },
+  { id: 'Founder & CEO', label: 'Founder & CEO', desc: 'Holistic revenue, high-level reporting & vision', icon: '/assets/clay/shield.png' },
+  { id: 'Head of Sales', label: 'Head of Sales / VP Revenue', desc: 'Pipelines, closing velocity & deal quotas', icon: '/assets/clay/chart.png' },
+  { id: 'Marketing Lead', label: 'Marketing & Growth Director', desc: 'Lead generation, campaigns & inbox intake', icon: '/assets/clay/voice.png' },
+  { id: 'Operations Lead', label: 'Operations & RevOps', desc: 'Process automation, webhooks & team SOPs', icon: '/assets/clay/lightning.png' },
+  { id: 'Agency Owner', label: 'Agency Owner / Partner', desc: 'Client onboarding, retainers & deliverables', icon: '/assets/clay/companies.png' },
+  { id: 'Consultant', label: 'Independent Consultant / Practice', desc: 'Client advisory, bookings & project wiki', icon: '/assets/clay/docs.png' },
 ];
 
 const ORG_SIZES = [
@@ -38,26 +38,26 @@ const TEAM_SIZES = [
 ];
 
 const INDUSTRIES = [
-  { id: 'B2B SaaS & Tech', label: 'B2B SaaS & Tech', desc: 'Recurring subscriptions, demos, API workflows', icon: '💻' },
-  { id: 'Marketing & Creative Agency', label: 'Marketing & Creative Agency', desc: 'Client retainers, pitches, deliverables & campaigns', icon: '🎨' },
-  { id: 'Real Estate & Property Management', label: 'Real Estate & Property', desc: 'Dealflow, acquisitions, buyer listings & closings', icon: '🏢' },
-  { id: 'E-Commerce & DTC Brands', label: 'E-Commerce & DTC Brands', desc: 'Inbound customers, influencer partners, support chat', icon: '🛍️' },
-  { id: 'Healthcare & Clinics', label: 'Healthcare & Wellness', desc: 'Patient appointments, clinic intake, HIPAA protocols', icon: '🏥' },
-  { id: 'Legal & Financial Services', label: 'Legal & Financial Advisory', desc: 'Wealth management, retainers, compliance docs', icon: '⚖️' },
-  { id: 'Home Services & Contracting', label: 'Home Services & Contracting', desc: 'Dispatch jobs, quotes, field appointments & SMS', icon: '🛠️' },
-  { id: 'Consulting & Professional Services', label: 'Management Consulting', desc: 'Strategic proposals, client wikis & deliverables', icon: '📊' },
+  { id: 'B2B SaaS & Tech', label: 'B2B SaaS & Tech', desc: 'Recurring subscriptions, demos, API workflows', icon: '/assets/clay/lightning.png' },
+  { id: 'Marketing & Creative Agency', label: 'Marketing & Creative Agency', desc: 'Client retainers, pitches, deliverables & campaigns', icon: '/assets/clay/chat.png' },
+  { id: 'Real Estate & Property Management', label: 'Real Estate & Property', desc: 'Dealflow, acquisitions, buyer listings & closings', icon: '/assets/clay/companies.png' },
+  { id: 'E-Commerce & DTC Brands', label: 'E-Commerce & DTC Brands', desc: 'Inbound customers, influencer partners, support chat', icon: '/assets/clay/tasks.png' },
+  { id: 'Healthcare & Clinics', label: 'Healthcare & Wellness', desc: 'Patient appointments, clinic intake, HIPAA protocols', icon: '/assets/clay/calendar.png' },
+  { id: 'Legal & Financial Services', label: 'Legal & Financial Advisory', desc: 'Wealth management, retainers, compliance docs', icon: '/assets/clay/shield.png' },
+  { id: 'Home Services & Contracting', label: 'Home Services & Contracting', desc: 'Dispatch jobs, quotes, field appointments & SMS', icon: '/assets/clay/voice.png' },
+  { id: 'Consulting & Professional Services', label: 'Management Consulting', desc: 'Strategic proposals, client wikis & deliverables', icon: '/assets/clay/docs.png' },
 ];
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
-  contacts: <Users size={16} />,
-  companies: <Building2 size={16} />,
-  pipeline: <KanbanSquare size={16} />,
-  workflows: <Zap size={16} />,
-  conversations: <MessageSquare size={16} />,
-  calendar: <Calendar size={16} />,
-  docs: <FileText size={16} />,
-  tasks: <CheckSquare size={16} />,
-  team: <ShieldCheck size={16} />,
+  contacts: <img src="/assets/clay/contacts.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  companies: <img src="/assets/clay/companies.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  pipeline: <img src="/assets/clay/chart.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  workflows: <img src="/assets/clay/lightning.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  conversations: <img src="/assets/clay/chat.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  calendar: <img src="/assets/clay/calendar.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  docs: <img src="/assets/clay/docs.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  tasks: <img src="/assets/clay/tasks.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
+  team: <img src="/assets/clay/shield.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />,
 };
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => {
@@ -291,7 +291,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => 
                       className={`onboarding-card ${isSelected ? 'selected' : ''}`}
                       onClick={() => setSelectedRole(role.id)}
                     >
-                      <span style={{ fontSize: '1.4rem' }}>{role.icon}</span>
+                      {role.icon.startsWith('/') ? (
+                        <img 
+                          src={role.icon} 
+                          alt="" 
+                          style={{ width: '28px', height: '28px', objectFit: 'contain', flexShrink: 0 }} 
+                        />
+                      ) : (
+                        <span style={{ fontSize: '1.4rem' }}>{role.icon}</span>
+                      )}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '0.88rem', fontWeight: 600, color: isSelected ? 'var(--lilac-300)' : 'var(--text-main)' }}>
                           {role.label}
@@ -417,7 +425,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => 
                       className={`onboarding-card ${isSelected ? 'selected' : ''}`}
                       onClick={() => setSelectedIndustry(ind.id)}
                     >
-                      <span style={{ fontSize: '1.3rem' }}>{ind.icon}</span>
+                      {ind.icon.startsWith('/') ? (
+                        <img 
+                          src={ind.icon} 
+                          alt="" 
+                          style={{ width: '26px', height: '26px', objectFit: 'contain', flexShrink: 0 }} 
+                        />
+                      ) : (
+                        <span style={{ fontSize: '1.3rem' }}>{ind.icon}</span>
+                      )}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '0.86rem', fontWeight: 600, color: isSelected ? 'var(--lilac-300)' : 'var(--text-main)' }}>
                           {ind.label}

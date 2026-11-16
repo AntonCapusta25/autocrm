@@ -81,8 +81,12 @@ export const NotionDocsView: React.FC = () => {
       {/* Header bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.4rem' }}>📝</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img 
+              src="/assets/clay/docs.png" 
+              alt="Docs & Playbooks" 
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+            />
             <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               Documents & Client SOPs
             </h1>

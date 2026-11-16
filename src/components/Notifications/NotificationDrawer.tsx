@@ -79,7 +79,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ onClose,
           background: 'var(--notion-card)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Bell size={18} style={{ color: 'var(--lilac-400)' }} />
+            <img 
+              src="/assets/clay/chat.png" 
+              alt="Notifications" 
+              style={{ width: '22px', height: '22px', objectFit: 'contain' }} 
+            />
             <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>
               Notifications & Alerts
             </h3>

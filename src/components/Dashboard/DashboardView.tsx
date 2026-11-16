@@ -54,8 +54,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Notion Top Overview Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.5rem' }}>⚡</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img 
+              src="/assets/clay/dashboard.png" 
+              alt="Dashboard" 
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+            />
             <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               Executive Operating Console
             </h1>

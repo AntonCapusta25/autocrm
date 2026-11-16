@@ -113,7 +113,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onTabChange('dashboard')}
         >
           <div className="notion-nav-left">
-            <LayoutDashboard size={15} />
+            <img 
+              src="/assets/clay/dashboard.png" 
+              alt="" 
+              style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+            />
             <span>Overview & Metrics</span>
           </div>
         </button>
@@ -129,7 +133,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('contacts')}
           >
             <div className="notion-nav-left">
-              <Users size={15} />
+              <img 
+                src="/assets/clay/contacts.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Contacts</span>
             </div>
             <span className="notion-badge">{contacts.length}</span>
@@ -142,7 +150,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('companies')}
           >
             <div className="notion-nav-left">
-              <Building2 size={15} />
+              <img 
+                src="/assets/clay/companies.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Companies</span>
             </div>
             <span className="notion-badge">{companies.length}</span>
@@ -155,7 +167,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('pipeline')}
           >
             <div className="notion-nav-left">
-              <KanbanSquare size={15} />
+              <img 
+                src="/assets/clay/chart.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Sales Pipeline</span>
             </div>
             <span className="notion-badge">{activeOppsCount}</span>
@@ -173,7 +189,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('workflows')}
           >
             <div className="notion-nav-left">
-              <Zap size={15} style={{ color: 'var(--lilac-400)' }} />
+              <img 
+                src="/assets/clay/lightning.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Workflows</span>
             </div>
             <span className="notion-badge lilac">{activeWorkflowsCount}</span>
@@ -186,7 +206,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('conversations')}
           >
             <div className="notion-nav-left">
-              <MessageSquare size={15} />
+              <img 
+                src="/assets/clay/chat.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Unified Inbox</span>
             </div>
             {unreadConversations > 0 ? (
@@ -203,7 +227,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('calendar')}
           >
             <div className="notion-nav-left">
-              <Calendar size={15} />
+              <img 
+                src="/assets/clay/calendar.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Appointments</span>
             </div>
             <span className="notion-badge">{appointments.length}</span>
@@ -221,7 +249,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('docs')}
           >
             <div className="notion-nav-left">
-              <FileText size={15} />
+              <img 
+                src="/assets/clay/docs.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Docs & SOPs</span>
             </div>
             <span className="notion-badge">{notionDocs.length}</span>
@@ -234,7 +266,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onTabChange('tasks')}
           >
             <div className="notion-nav-left">
-              <CheckSquare size={15} />
+              <img 
+                src="/assets/clay/tasks.png" 
+                alt="" 
+                style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+              />
               <span>Tasks & To-Dos</span>
             </div>
             {overdueCount > 0 ? (
@@ -253,7 +289,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onTabChange('team')}
         >
           <div className="notion-nav-left">
-            <ShieldCheck size={15} />
+            <img 
+              src="/assets/clay/shield.png" 
+              alt="" 
+              style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+            />
             <span>Team & Access</span>
           </div>
           <span className="notion-badge">{teamMembers.length}</span>
@@ -265,7 +305,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           style={{ color: 'var(--lilac-300)' }}
         >
           <div className="notion-nav-left">
-            <Sparkles size={15} style={{ color: 'var(--lilac-400)' }} />
+            <img 
+              src="/assets/clay/voice.png" 
+              alt="" 
+              style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
+            />
             <span>Modules & Add-ons</span>
           </div>
           <span className="notion-badge lilac" style={{ fontSize: '0.66rem' }}>✨ Enterprise</span>
