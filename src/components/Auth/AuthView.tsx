@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Building2, Mail, Lock, User, ArrowRight, AlertCircle, 
-  Layers
+  Layers, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface SlideItem {
@@ -64,6 +64,15 @@ export const AuthView: React.FC = () => {
   // Carousel & Autoscroll State
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
+
+  const handlePrevSlide = () => {
+    setActiveSlideIndex(prev => (prev - 1 + SLIDES.length) % SLIDES.length);
+  };
+
+  const handleNextSlide = () => {
+    setActiveSlideIndex(prev => (prev + 1) % SLIDES.length);
+  };
 
   // Auto-advance timer (every 4.5 seconds)
   useEffect(() => {
@@ -74,7 +83,39 @@ export const AuthView: React.FC = () => {
     }, 4500);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, activeSlideIndex]);
+
+  // Keyboard navigation for carousel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement as HTMLElement)?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        handlePrevSlide();
+      } else if (e.key === 'ArrowRight') {
+        handleNextSlide();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = e.changedTouches[0].clientX - touchStartXRef.current;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        handlePrevSlide();
+      } else {
+        handleNextSlide();
+      }
+    }
+    touchStartXRef.current = null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +197,8 @@ export const AuthView: React.FC = () => {
         className="frozen-glass-pane"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={{
           padding: '44px 56px',
           display: 'flex',
@@ -186,7 +229,7 @@ export const AuthView: React.FC = () => {
               AutoFlow Studio
             </span>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              Multi-Tenant CRM & Operations
+              Executive CRM & Operations
             </div>
           </div>
         </div>
@@ -305,55 +348,122 @@ export const AuthView: React.FC = () => {
             </p>
           </div>
 
-          {/* Animated Steps / Dots Below */}
+          {/* Interactive Navigation Controls: Left Arrow, Animated Dots / Steps, Right Arrow */}
           <div 
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '10px',
+              gap: '14px',
+              marginTop: '6px',
             }}
           >
-            {SLIDES.map((slide, idx) => {
-              const isActive = idx === activeSlideIndex;
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => setActiveSlideIndex(idx)}
-                  title={slide.title}
-                  style={{
-                    height: '6px',
-                    width: isActive ? '36px' : '6px',
-                    borderRadius: '4px',
-                    background: isActive ? 'var(--lilac-400)' : 'rgba(255, 255, 255, 0.22)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                    padding: 0,
-                    boxShadow: isActive ? '0 0 12px rgba(167, 139, 250, 0.65)' : 'none',
-                  }}
-                />
-              );
-            })}
+            <button
+              type="button"
+              onClick={handlePrevSlide}
+              aria-label="Previous feature"
+              title="Previous feature (Left Arrow key)"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                backdropFilter: 'blur(8px)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(167, 139, 250, 0.18)';
+                e.currentTarget.style.borderColor = 'rgba(167, 139, 250, 0.45)';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1.08)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {/* Animated Steps / Dots */}
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              {SLIDES.map((slide, idx) => {
+                const isActive = idx === activeSlideIndex;
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setActiveSlideIndex(idx)}
+                    title={slide.title}
+                    style={{
+                      height: '6px',
+                      width: isActive ? '36px' : '6px',
+                      borderRadius: '4px',
+                      background: isActive ? 'var(--lilac-400)' : 'rgba(255, 255, 255, 0.22)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                      padding: 0,
+                      boxShadow: isActive ? '0 0 12px rgba(167, 139, 250, 0.65)' : 'none',
+                    }}
+                  />
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextSlide}
+              aria-label="Next feature"
+              title="Next feature (Right Arrow key)"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                backdropFilter: 'blur(8px)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(167, 139, 250, 0.18)';
+                e.currentTarget.style.borderColor = 'rgba(167, 139, 250, 0.45)';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1.08)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
         </div>
 
-        {/* Footer Meta */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '0.74rem',
-            color: 'var(--text-muted)',
-            position: 'relative',
-            zIndex: 2,
-          }}
-        >
-          <span>Multi-Tenant Architecture</span>
-          <span>PostgreSQL Row-Level Security</span>
-        </div>
+        {/* Empty space placeholder for bottom alignment balance */}
+        <div style={{ height: '8px' }} />
       </div>
 
       {/* Right Column: Sign Up / Sign In Form */}

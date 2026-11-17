@@ -23,6 +23,7 @@ import { ModulesMarketplaceModal } from './components/Modules/ModulesMarketplace
 import { DataTransferModal } from './components/ImportExport/DataTransferModal';
 import { WorkspaceIntroTourModal } from './components/Onboarding/WorkspaceIntroTourModal';
 import { TryOnMobileModal } from './components/Mobile/TryOnMobileModal';
+import { MobilePwaPromptBanner } from './components/Mobile/MobilePwaPromptBanner';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -249,6 +250,11 @@ const MainAppContent: React.FC = () => {
       <TryOnMobileModal 
         isOpen={mobileModalOpen}
         onClose={() => setMobileModalOpen(false)}
+      />
+
+      {/* Persistent & Dismissible Floating Mobile PWA Pop-Up Prompt */}
+      <MobilePwaPromptBanner 
+        onOpenMobileModal={() => setMobileModalOpen(true)}
       />
     </div>
   );
