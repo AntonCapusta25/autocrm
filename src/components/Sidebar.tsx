@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Building2, KanbanSquare, 
   CheckSquare, ShieldCheck, Zap, MessageSquare, 
   Calendar, FileText, Sparkles, Sliders, Smartphone,
-  Upload, HelpCircle
+  Upload, HelpCircle, X
 } from 'lucide-react';
 
 export type NavTab = 
@@ -27,6 +27,8 @@ interface SidebarProps {
   onOpenMobile?: () => void;
   onOpenDataTransfer?: () => void;
   onOpenTour?: () => void;
+  isOpenOnMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -37,6 +39,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenMobile,
   onOpenDataTransfer,
   onOpenTour,
+  isOpenOnMobile = false,
+  onCloseMobile,
 }) => {
   const { 
     currentWorkspace, contacts, companies, opportunities, 
@@ -50,8 +54,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const unreadConversations = conversations.filter(c => c.unread).length;
   const activeWorkflowsCount = workflows.filter(w => w.active).length;
 
+  const handleNavClick = (tab: NavTab) => {
+    onTabChange(tab);
+    onCloseMobile?.();
+  };
+
   return (
-    <aside className="notion-sidebar">
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpenOnMobile && (
+        <div 
+          className="mobile-sidebar-backdrop animate-fade-in" 
+          onClick={onCloseMobile} 
+        />
+      )}
+
+      <aside className={`notion-sidebar ${isOpenOnMobile ? 'mobile-open' : ''}`}>
       {/* Workspace Bar */}
       <div className="notion-sidebar-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
@@ -86,23 +104,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={onOpenOnboarding}
-          title="Configure Workspace Modules"
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--lilac-300)',
-            cursor: 'pointer',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: '4px'
-          }}
-        >
-          <Sliders size={14} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              onOpenOnboarding();
+              onCloseMobile?.();
+            }}
+            title="Configure Workspace Modules"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--lilac-300)',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              borderRadius: '4px'
+            }}
+          >
+            <Sliders size={14} />
+          </button>
+
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="mobile-sidebar-close-btn"
+              title="Close navigation"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '4px'
+              }}
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Navigation Sections */}
@@ -110,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Dashboard is always available */}
         <button 
           className={`notion-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => onTabChange('dashboard')}
+          onClick={() => handleNavClick('dashboard')}
         >
           <div className="notion-nav-left">
             <img 
@@ -130,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('contacts') && (
           <button 
             className={`notion-nav-item ${activeTab === 'contacts' ? 'active' : ''}`}
-            onClick={() => onTabChange('contacts')}
+            onClick={() => handleNavClick('contacts')}
           >
             <div className="notion-nav-left">
               <img 
@@ -147,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('companies') && (
           <button 
             className={`notion-nav-item ${activeTab === 'companies' ? 'active' : ''}`}
-            onClick={() => onTabChange('companies')}
+            onClick={() => handleNavClick('companies')}
           >
             <div className="notion-nav-left">
               <img 
@@ -164,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('pipeline') && (
           <button 
             className={`notion-nav-item ${activeTab === 'pipeline' ? 'active' : ''}`}
-            onClick={() => onTabChange('pipeline')}
+            onClick={() => handleNavClick('pipeline')}
           >
             <div className="notion-nav-left">
               <img 
@@ -186,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('workflows') && (
           <button 
             className={`notion-nav-item ${activeTab === 'workflows' ? 'active' : ''}`}
-            onClick={() => onTabChange('workflows')}
+            onClick={() => handleNavClick('workflows')}
           >
             <div className="notion-nav-left">
               <img 
@@ -203,7 +247,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('conversations') && (
           <button 
             className={`notion-nav-item ${activeTab === 'conversations' ? 'active' : ''}`}
-            onClick={() => onTabChange('conversations')}
+            onClick={() => handleNavClick('conversations')}
           >
             <div className="notion-nav-left">
               <img 
@@ -224,7 +268,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('calendar') && (
           <button 
             className={`notion-nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
-            onClick={() => onTabChange('calendar')}
+            onClick={() => handleNavClick('calendar')}
           >
             <div className="notion-nav-left">
               <img 
@@ -246,7 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('docs') && (
           <button 
             className={`notion-nav-item ${activeTab === 'docs' ? 'active' : ''}`}
-            onClick={() => onTabChange('docs')}
+            onClick={() => handleNavClick('docs')}
           >
             <div className="notion-nav-left">
               <img 
@@ -263,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isModuleEnabled('tasks') && (
           <button 
             className={`notion-nav-item ${activeTab === 'tasks' ? 'active' : ''}`}
-            onClick={() => onTabChange('tasks')}
+            onClick={() => handleNavClick('tasks')}
           >
             <div className="notion-nav-left">
               <img 
@@ -286,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           className={`notion-nav-item ${activeTab === 'team' ? 'active' : ''}`}
-          onClick={() => onTabChange('team')}
+          onClick={() => handleNavClick('team')}
         >
           <div className="notion-nav-left">
             <img 
@@ -301,7 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           className="notion-nav-item"
-          onClick={onOpenMarketplace}
+          onClick={() => { onOpenMarketplace?.(); onCloseMobile?.(); }}
           style={{ color: 'var(--lilac-300)' }}
         >
           <div className="notion-nav-left">
@@ -317,7 +361,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           className="notion-nav-item"
-          onClick={onOpenDataTransfer}
+          onClick={() => { onOpenDataTransfer?.(); onCloseMobile?.(); }}
         >
           <div className="notion-nav-left">
             <Upload size={15} />
@@ -328,7 +372,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           className="notion-nav-item"
-          onClick={onOpenMobile}
+          onClick={() => { onOpenMobile?.(); onCloseMobile?.(); }}
           style={{ color: '#60a5fa' }}
         >
           <div className="notion-nav-left">
@@ -374,5 +418,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
     </aside>
+    </>
   );
 };

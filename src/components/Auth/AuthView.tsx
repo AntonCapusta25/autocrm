@@ -153,15 +153,10 @@ export const AuthView: React.FC = () => {
 
   return (
     <div
+      className="auth-grid-container"
       style={{
-        minHeight: '100vh',
-        width: '100vw',
         background: 'var(--notion-deep-black)',
         color: 'var(--text-main)',
-        display: 'grid',
-        gridTemplateColumns: '1.15fr 0.85fr',
-        position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* Background Ambient Glows for Frozen Glass Sheen */}
@@ -267,23 +262,14 @@ export const AuthView: React.FC = () => {
           {/* Big 3D Clay Icon (No Box Around It) */}
           <div 
             key={`clay-icon-${currentSlide.id}`}
-            className="animate-slide-in"
-            style={{ 
-              position: 'relative', 
-              width: '240px',
-              height: '240px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              margin: '0 0 20px',
-            }}
+            className="auth-clay-container animate-slide-in"
           >
             {/* Ambient Radial Colored Glow beneath the 3D clay icon */}
             <div 
               style={{
                 position: 'absolute',
-                width: '210px',
-                height: '210px',
+                width: '90%',
+                height: '90%',
                 borderRadius: '50%',
                 background: `radial-gradient(circle, ${currentSlide.glowColor} 0%, rgba(0, 0, 0, 0) 70%)`,
                 filter: 'blur(36px)',
@@ -305,14 +291,7 @@ export const AuthView: React.FC = () => {
               <img 
                 src={currentSlide.imageSrc} 
                 alt={currentSlide.title}
-                style={{
-                  width: '220px',
-                  height: '220px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6))',
-                  userSelect: 'none',
-                  pointerEvents: 'none',
-                }}
+                className="auth-clay-img"
               />
             </div>
           </div>

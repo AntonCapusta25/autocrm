@@ -191,3 +191,4 @@ export const MobilePwaPromptBanner: React.FC<MobilePwaPromptBannerProps> = ({ on
     </div>
   );
 };
+

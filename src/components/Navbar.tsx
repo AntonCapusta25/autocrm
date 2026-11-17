@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   Bell, CheckCircle2, ChevronDown, 
   Plus, Sparkles, ChevronRight, LogOut,
-  Smartphone, Upload, HelpCircle
+  Smartphone, Upload, HelpCircle, Menu
 } from 'lucide-react';
 import { NavTab } from './Sidebar';
 
@@ -14,6 +14,7 @@ interface NavbarProps {
   onOpenMobile?: () => void;
   onOpenDataTransfer?: () => void;
   onOpenTour?: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 const TAB_TITLES: Record<NavTab, { title: string; category: string }> = {
@@ -36,6 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMobile,
   onOpenDataTransfer,
   onOpenTour,
+  onToggleMobileMenu,
 }) => {
   const { 
     currentWorkspace, workspaces, createWorkspace, switchWorkspace,
@@ -62,8 +64,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       <header className="notion-top-bar">
-        {/* Left: Notion Breadcrumbs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Left: Hamburger (Mobile) & Notion Breadcrumbs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {onToggleMobileMenu && (
+            <button
+              type="button"
+              onClick={onToggleMobileMenu}
+              className="mobile-menu-trigger-btn"
+              title="Open Navigation"
+              aria-label="Toggle navigation menu"
+            >
+              <Menu size={18} />
+            </button>
+          )}
+
           {/* Workspace Switcher */}
           <div style={{ position: 'relative' }}>
             <button 

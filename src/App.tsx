@@ -24,6 +24,7 @@ import { DataTransferModal } from './components/ImportExport/DataTransferModal';
 import { WorkspaceIntroTourModal } from './components/Onboarding/WorkspaceIntroTourModal';
 import { TryOnMobileModal } from './components/Mobile/TryOnMobileModal';
 import { MobilePwaPromptBanner } from './components/Mobile/MobilePwaPromptBanner';
+import { MobileBottomBar } from './components/Mobile/MobileBottomBar';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -43,6 +44,7 @@ const MainAppContent: React.FC = () => {
   const [dataTransferModalOpen, setDataTransferModalOpen] = useState(false);
   const [mobileModalOpen, setMobileModalOpen] = useState(false);
   const [tourModalOpen, setTourModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Auto-launch workspace education tour once per workspace
   React.useEffect(() => {
@@ -95,6 +97,8 @@ const MainAppContent: React.FC = () => {
         onOpenMobile={() => setMobileModalOpen(true)}
         onOpenDataTransfer={() => setDataTransferModalOpen(true)}
         onOpenTour={() => setTourModalOpen(true)}
+        isOpenOnMobile={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -106,6 +110,7 @@ const MainAppContent: React.FC = () => {
           onOpenMobile={() => setMobileModalOpen(true)}
           onOpenDataTransfer={() => setDataTransferModalOpen(true)}
           onOpenTour={() => setTourModalOpen(true)}
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
 
         <main className="content-viewport">
@@ -255,6 +260,13 @@ const MainAppContent: React.FC = () => {
       {/* Persistent & Dismissible Floating Mobile PWA Pop-Up Prompt */}
       <MobilePwaPromptBanner 
         onOpenMobileModal={() => setMobileModalOpen(true)}
+      />
+
+      {/* Native Mobile Bottom Navigation Bar (Metrics, Pipeline, Inbox, Tasks, More) */}
+      <MobileBottomBar 
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+        onOpenMoreMenu={() => setMobileMenuOpen(true)}
       />
     </div>
   );
