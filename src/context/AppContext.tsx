@@ -539,6 +539,123 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, [hydrateWorkspaceFromSupabase]);
 
+  // Automated Welcome & Admin Alert Email Dispatcher
+  const dispatchAuthEmails = async (payload: {
+    email: string;
+    fullName: string;
+    companyName: string;
+    isNewUser: boolean;
+  }) => {
+    const timestamp = new Date().toLocaleString('en-US', { timeZoneName: 'short' });
+    const adminEmail = 'admin@autoflow.studio';
+
+    // 1. User Welcome / Sign-in HTML
+    const userSubject = payload.isNewUser
+      ? `Welcome to AutoFlow Studio, ${payload.fullName.split(' ')[0]}! 🚀`
+      : `AutoFlow Studio: Successful Sign-In (${payload.companyName})`;
+
+    const userHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0c10; color: #f9fafb; padding: 40px 20px; border-radius: 12px; max-width: 580px; margin: 0 auto; border: 1px solid #1e2433;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #c4b5fd; font-size: 24px; margin-bottom: 8px;">AutoFlow Studio</h1>
+          <p style="color: #94a3b8; font-size: 14px; margin: 0;">Bespoke CRM & Automation Infrastructure</p>
+        </div>
+        <div style="background-color: #11141c; border-radius: 10px; padding: 24px; border: 1px solid #1e2433;">
+          <h2 style="color: #f9fafb; font-size: 18px; margin-top: 0;">${payload.isNewUser ? 'Welcome to your new workspace!' : 'Security Alert: Sign-In Verified'}</h2>
+          <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">
+            ${payload.isNewUser 
+              ? `Hello ${payload.fullName}, your dedicated organization workspace <strong>${payload.companyName}</strong> has been initialized. You have full access to your contacts, sales pipeline, SOP docs, and mobile PWA sync.`
+              : `Hello ${payload.fullName}, a new sign-in session was authenticated for your workspace <strong>${payload.companyName}</strong> at ${timestamp}.`
+            }
+          </p>
+          <div style="margin: 20px 0; padding: 12px 16px; background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 6px; font-size: 13px; color: #c4b5fd;">
+            <strong>Workspace:</strong> ${payload.companyName}<br/>
+            <strong>Email:</strong> ${payload.email}<br/>
+            <strong>Session Time:</strong> ${timestamp}
+          </div>
+        </div>
+        <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 24px;">AutoFlow Studio • Dedicated Tenant Security</p>
+      </div>
+    `;
+
+    // 2. Admin Alert HTML
+    const adminSubject = `[AutoFlow Alert] ${payload.isNewUser ? 'New User Registered' : 'User Signed In'}: ${payload.fullName} (${payload.companyName})`;
+    const adminHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0c10; color: #f9fafb; padding: 32px 20px; border-radius: 10px; max-width: 580px; margin: 0 auto; border: 1px solid #2e364d;">
+        <h2 style="color: #fbbf24; margin-top: 0; font-size: 18px;">⚡ Admin Activity Notification</h2>
+        <p style="color: #94a3b8; font-size: 14px;">A tenant auth event was recorded in AutoFlow CRM:</p>
+        <div style="background: #11141c; padding: 16px; border-radius: 8px; border: 1px solid #1e2433; font-size: 13px; line-height: 1.7;">
+          <div><strong style="color: #f9fafb;">Event:</strong> <span style="color: ${payload.isNewUser ? '#34d399' : '#60a5fa'};">${payload.isNewUser ? 'New Organization Registration' : 'Account Sign-In'}</span></div>
+          <div><strong style="color: #f9fafb;">User Name:</strong> ${payload.fullName}</div>
+          <div><strong style="color: #f9fafb;">Work Email:</strong> ${payload.email}</div>
+          <div><strong style="color: #f9fafb;">Company:</strong> ${payload.companyName}</div>
+          <div><strong style="color: #f9fafb;">Timestamp:</strong> ${timestamp}</div>
+          <div><strong style="color: #f9fafb;">User Agent:</strong> ${typeof navigator !== 'undefined' ? navigator.userAgent : 'Server'}</div>
+        </div>
+      </div>
+    `;
+
+    // Dispatch via /api/send-email (Vercel Serverless Function)
+    try {
+      // Send welcome to user
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: payload.email,
+          subject: userSubject,
+          html: userHtml,
+        })
+      }).catch(e => console.warn('User welcome email invoke warning:', e));
+
+      // Send alert to admin
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: adminEmail,
+          subject: adminSubject,
+          html: adminHtml,
+        })
+      }).catch(e => console.warn('Admin alert email invoke warning:', e));
+    } catch (err) {
+      console.warn('Dispatch auth emails exception:', err);
+    }
+
+    // Also dispatch to Supabase edge function if connected
+    const sb = getSupabaseClient();
+    if (sb) {
+      try {
+        await sb.functions.invoke('send-email', {
+          body: {
+            type: payload.isNewUser ? 'welcome_new_user' : 'user_sign_in',
+            userEmail: payload.email,
+            userName: payload.fullName,
+            company: payload.companyName,
+            timestamp,
+          }
+        });
+      } catch (e) {
+        // Ignored if local or no edge function deployed
+      }
+    }
+
+    // Push instant in-app notification
+    const inAppNotif: AppNotification = {
+      id: `notif-${Date.now()}`,
+      workspace_id: currentWorkspaceId,
+      user_id: currentUserId,
+      type: 'workflow_run',
+      title: payload.isNewUser ? 'Welcome to AutoFlow Studio! 🎉' : 'Session Verified 🔒',
+      message: payload.isNewUser
+        ? `Welcome ${payload.fullName}! Workspace "${payload.companyName}" initialized. Welcome & admin alerts dispatched.`
+        : `Signed in as ${payload.email}. Welcome and admin notification alerts dispatched.`,
+      read: false,
+      created_at: new Date().toISOString(),
+    };
+    setAllNotifications(prev => [inAppNotif, ...prev]);
+  };
+
   // Multi-Tenant Company Registration
   const registerCompanyAccount = async ({
     companyName,
@@ -613,6 +730,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await sb.from('workspace_members').upsert(ownerMember);
     }
 
+    // Dispatch welcome email to user and notification email to admin
+    dispatchAuthEmails({
+      email,
+      fullName,
+      companyName,
+      isNewUser: true,
+    });
+
     return { success: true };
   };
 
@@ -642,6 +767,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           setCurrentWorkspaceId(remoteWs[0].id);
           await hydrateWorkspaceFromSupabase(remoteWs[0].id);
+
+          dispatchAuthEmails({
+            email,
+            fullName: data.user.user_metadata?.full_name || email.split('@')[0],
+            companyName: remoteWs[0].name,
+            isNewUser: false,
+          });
+
           return { success: true };
         }
       }
@@ -656,6 +789,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentWorkspaceId(localAccount.workspaceId);
       setIsAuthenticated(true);
       await hydrateWorkspaceFromSupabase(localAccount.workspaceId);
+
+      const ws = allWorkspaces.find(w => w.id === localAccount.workspaceId);
+      dispatchAuthEmails({
+        email,
+        fullName: localAccount.fullName || email.split('@')[0],
+        companyName: ws?.name || 'Workspace',
+        isNewUser: false,
+      });
+
       return { success: true };
     }
 

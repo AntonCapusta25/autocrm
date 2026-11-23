@@ -3,14 +3,14 @@ import { useApp } from '../../context/AppContext';
 import { 
   X, Upload, Download, CheckCircle2, 
   ArrowRight, ArrowLeft, Check, 
-  FileSpreadsheet
+  FileSpreadsheet, Zap, Sparkles
 } from 'lucide-react';
 
 interface DataTransferModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'import' | 'export';
-  initialEntity?: 'contacts' | 'tasks' | 'opportunities';
+  initialEntity?: 'smart' | 'contacts' | 'tasks' | 'opportunities';
 }
 
 interface InstructionSlide {
@@ -22,24 +22,29 @@ interface InstructionSlide {
 
 const IMPORT_INSTRUCTION_SLIDES: InstructionSlide[] = [
   {
-    title: '1. Prepare Your CSV Columns',
-    description: 'Ensure your spreadsheet has a header row with standard column names (e.g. First Name, Last Name, Email, Phone, Company, Job Title).',
-    iconSrc: '/assets/clay/docs.png',
+    title: '1. Multi-Entity Smart Detection',
+    description: 'AutoFlow can ingest Contacts, Companies, Pipeline Deals, and Follow-Up Tasks simultaneously in one connected row.',
+    iconSrc: '/assets/clay/lightning.png',
     glowColor: 'rgba(167, 139, 250, 0.4)',
   },
   {
     title: '2. Download & Verify Sample Template',
-    description: 'Use our pre-formatted template to eliminate duplicate keys, trailing spaces, or invalid international phone number formats.',
-    iconSrc: '/assets/clay/chart.png',
+    description: 'Use our pre-formatted smart template to eliminate duplicate keys, trailing spaces, or invalid data types.',
+    iconSrc: '/assets/clay/docs.png',
     glowColor: 'rgba(96, 165, 250, 0.4)',
   },
   {
-    title: '3. Real-Time Ingestion & Deduplication',
-    description: 'AutoFlow automatically detects existing emails, validates stage values, and streams records into your isolated tenant database.',
-    iconSrc: '/assets/clay/lightning.png',
+    title: '3. Real-Time Relational Ingestion',
+    description: 'The engine automatically links new contacts to their companies and creates scheduled tasks for your team.',
+    iconSrc: '/assets/clay/chart.png',
     glowColor: 'rgba(52, 211, 153, 0.4)',
   },
 ];
+
+const SAMPLE_SMART_CSV = `First Name,Last Name,Email,Phone,Job Title,Company,Industry,Deal Name,Deal Value,Deal Stage,Follow-up Task,Task Due Date,Task Priority
+Elena,Rostova,elena@solariabio.com,+31 20 555 0192,Head of BioTech,Solaria BioLabs,Biotechnology,Enterprise Lab Automation,75000,Proposal,Review compliance and NEN certification,2026-11-28,High
+Marcus,Vance,marcus@vancegrowth.com,+1 555-342-9901,CEO,Vance Growth,Management Consulting,CRM Migration & Drip Automation,32000,Qualified,Schedule technical architecture sync,2026-11-26,Urgent
+Kenji,Sato,kenji@quantumfin.jp,+81 3 5555 0143,VP Capital Markets,Quantum Financial,FinTech & Banking,Bespoke Reporting Engine,95000,Contacted,Prepare executive demonstration,2026-12-02,Medium`;
 
 const SAMPLE_CONTACTS_CSV = `First Name,Last Name,Email,Phone,Company,Job Title,Stage,Value
 Sarah,Connor,sarah@cyberdyne.io,+1 555-019-2834,Cyberdyne Systems,Head of Operations,Proposal,45000
@@ -56,22 +61,29 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
   isOpen,
   onClose,
   initialMode = 'import',
-  initialEntity = 'contacts',
+  initialEntity = 'smart',
 }) => {
   const { 
-    contacts, tasks, opportunities, 
+    contacts, companies, tasks, opportunities, 
     importContactsCSV, exportContactsCSV,
-    addTask 
+    addTask, addCompany, addContact, addOpportunity
   } = useApp();
 
   const [mode, setMode] = useState<'import' | 'export'>(initialMode);
-  const [entity, setEntity] = useState<'contacts' | 'tasks' | 'opportunities'>(initialEntity);
+  const [entity, setEntity] = useState<'smart' | 'contacts' | 'tasks' | 'opportunities'>(initialEntity);
   const [showInstructions, setShowInstructions] = useState(true);
   const [instructionSlideIdx, setInstructionSlideIdx] = useState(0);
 
   // Import State
-  const [csvText, setCsvText] = useState(entity === 'tasks' ? SAMPLE_TASKS_CSV : SAMPLE_CONTACTS_CSV);
+  const [csvText, setCsvText] = useState(
+    initialEntity === 'smart' 
+      ? SAMPLE_SMART_CSV 
+      : initialEntity === 'tasks' 
+      ? SAMPLE_TASKS_CSV 
+      : SAMPLE_CONTACTS_CSV
+  );
   const [importedCount, setImportedCount] = useState<number | null>(null);
+  const [importedSummary, setImportedSummary] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -80,7 +92,12 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
   const currentSlide = IMPORT_INSTRUCTION_SLIDES[instructionSlideIdx];
 
   const handleDownloadSample = () => {
-    const content = entity === 'tasks' ? SAMPLE_TASKS_CSV : SAMPLE_CONTACTS_CSV;
+    const content = 
+      entity === 'smart' 
+        ? SAMPLE_SMART_CSV 
+        : entity === 'tasks' 
+        ? SAMPLE_TASKS_CSV 
+        : SAMPLE_CONTACTS_CSV;
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -113,6 +130,9 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
       errors.push('File must have a header row and at least one data row.');
     }
     const headers = lines[0].toLowerCase();
+    if (entity === 'smart' && !headers.includes('email') && !headers.includes('company')) {
+      errors.push('Warning: Expected "Email" and/or "Company" columns in smart header.');
+    }
     if (entity === 'contacts' && !headers.includes('email') && !headers.includes('first')) {
       errors.push('Warning: Expected "First Name" and "Email" columns in header.');
     }
@@ -122,14 +142,150 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
     setValidationErrors(errors);
   };
 
+  // Robust Smart Multi-Entity Parser
+  const executeSmartImport = (text: string): { total: number; summary: string } => {
+    const lines = text.trim().split('\n').filter(l => l.trim().length > 0);
+    if (lines.length < 2) return { total: 0, summary: 'No records found to import.' };
+
+    const headerParts = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9]/g, ''));
+    const getColIdx = (aliases: string[]) => {
+      return headerParts.findIndex(h => aliases.some(a => h.includes(a)));
+    };
+
+    const idxFirst = getColIdx(['firstname', 'first', 'givenname']);
+    const idxLast = getColIdx(['lastname', 'last', 'surname']);
+    const idxEmail = getColIdx(['email', 'mail']);
+    const idxPhone = getColIdx(['phone', 'tel', 'mobile']);
+    const idxTitle = getColIdx(['jobtitle', 'title', 'role', 'position']);
+    const idxComp = getColIdx(['company', 'organization', 'account']);
+    const idxIndustry = getColIdx(['industry', 'sector']);
+    const idxDealName = getColIdx(['dealname', 'deal', 'opportunity']);
+    const idxDealVal = getColIdx(['dealvalue', 'value', 'amount']);
+    const idxDealStage = getColIdx(['dealstage', 'stage']);
+    const idxTask = getColIdx(['task', 'followup', 'todo', 'followuptask']);
+    const idxTaskDue = getColIdx(['taskdue', 'duedate', 'due']);
+    const idxTaskPri = getColIdx(['taskpriority', 'priority']);
+
+    let companiesAdded = 0;
+    let contactsAdded = 0;
+    let dealsAdded = 0;
+    let tasksAdded = 0;
+    const today = new Date().toISOString().split('T')[0];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const row: string[] = [];
+      let cur = '';
+      let inQuote = false;
+      for (let c = 0; c < line.length; c++) {
+        const ch = line[c];
+        if (ch === '"') {
+          if (inQuote && line[c + 1] === '"') {
+            cur += '"';
+            c++;
+          } else {
+            inQuote = !inQuote;
+          }
+        } else if (ch === ',' && !inQuote) {
+          row.push(cur.trim());
+          cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      row.push(cur.trim());
+
+      const companyName = idxComp >= 0 ? row[idxComp] : '';
+      const email = idxEmail >= 0 ? row[idxEmail] : '';
+      const firstName = idxFirst >= 0 ? row[idxFirst] : '';
+      const lastName = idxLast >= 0 ? row[idxLast] : '';
+
+      if (!companyName && !email && !firstName) continue;
+
+      // 1. Ingest Company
+      let comp = companyName ? companies.find(c => c.name.toLowerCase() === companyName.toLowerCase()) : undefined;
+      if (companyName && !comp) {
+        comp = addCompany({
+          name: companyName,
+          industry: (idxIndustry >= 0 && row[idxIndustry]) ? row[idxIndustry] : 'Enterprise',
+          address: 'Amsterdam, Netherlands',
+          website: `https://${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+        });
+        companiesAdded++;
+      }
+
+      // 2. Ingest Contact
+      let contact = email ? contacts.find(c => c.email.toLowerCase() === email.toLowerCase()) : undefined;
+      if (!contact && (email || firstName)) {
+        contact = addContact({
+          first_name: firstName || 'Lead',
+          last_name: lastName || '',
+          email: email || `contact-${Date.now()}@${comp ? comp.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.io' : 'autoflow.io'}`,
+          phone: idxPhone >= 0 ? row[idxPhone] : '',
+          job_title: idxTitle >= 0 ? row[idxTitle] : 'Stakeholder',
+          company_id: comp?.id,
+          company_name: comp?.name || companyName || '',
+          tags: ['Smart Upload', comp?.name || 'Verified'].filter(Boolean),
+          custom_fields: { source: 'Smart CSV Import' },
+        });
+        contactsAdded++;
+      }
+
+      // 3. Ingest Deal
+      const dealName = idxDealName >= 0 ? row[idxDealName] : '';
+      const rawVal = idxDealVal >= 0 ? row[idxDealVal].replace(/[^0-9.]/g, '') : '';
+      const dealVal = rawVal ? Number(rawVal) : 0;
+      if (dealName || dealVal > 0) {
+        addOpportunity({
+          name: dealName || `${comp?.name || firstName} Commercial Deal`,
+          deal_value: dealVal || 25000,
+          stage: (idxDealStage >= 0 && row[idxDealStage]) ? (row[idxDealStage] as any) : 'Qualified',
+          expected_closing_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+          company_id: comp?.id,
+          company_name: comp?.name,
+          contact_id: contact?.id,
+          contact_name: contact ? `${contact.first_name} ${contact.last_name}` : undefined,
+        });
+        dealsAdded++;
+      }
+
+      // 4. Ingest Task
+      const taskTitle = idxTask >= 0 ? row[idxTask] : '';
+      if (taskTitle) {
+        addTask({
+          title: taskTitle,
+          due_date: (idxTaskDue >= 0 && row[idxTaskDue]) ? row[idxTaskDue] : today,
+          priority: (idxTaskPri >= 0 && row[idxTaskPri]) ? (row[idxTaskPri] as any) : 'High',
+          status: 'To Do',
+          assigned_to: 'user-alex',
+          related_contact_id: contact?.id,
+          related_contact_name: contact ? `${contact.first_name} ${contact.last_name}` : undefined,
+          related_company_id: comp?.id,
+          related_company_name: comp?.name,
+          description: 'Auto-generated follow-up task from Smart Upload CSV.',
+        });
+        tasksAdded++;
+      }
+    }
+
+    const total = companiesAdded + contactsAdded + dealsAdded + tasksAdded;
+    const summary = `Smart Upload complete: Created ${companiesAdded} companies, ${contactsAdded} contacts, ${dealsAdded} pipeline deals, and ${tasksAdded} follow-up tasks!`;
+    return { total, summary };
+  };
+
   const handleExecuteImport = () => {
     if (!csvText.trim()) return;
     setIsProcessing(true);
 
     try {
-      if (entity === 'contacts') {
+      if (entity === 'smart') {
+        const { total, summary } = executeSmartImport(csvText);
+        setImportedCount(total);
+        setImportedSummary(summary);
+      } else if (entity === 'contacts') {
         const count = importContactsCSV(csvText);
         setImportedCount(count);
+        setImportedSummary(`Successfully imported ${count} contacts into your workspace!`);
       } else if (entity === 'tasks') {
         const lines = csvText.trim().split('\n');
         let count = 0;
@@ -140,7 +296,7 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
               title: parts[0],
               due_date: parts[1] || new Date().toISOString().split('T')[0],
               priority: (parts[2] as any) || 'Medium',
-              status: (parts[3] as any) || 'Pending',
+              status: (parts[3] as any) || 'To Do',
               assigned_to: 'user-alex',
               description: parts[5] || '',
             });
@@ -148,13 +304,15 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
           }
         }
         setImportedCount(count);
+        setImportedSummary(`Successfully imported ${count} tasks into your checklist!`);
       }
     } finally {
       setIsProcessing(false);
       setTimeout(() => {
         onClose();
         setImportedCount(null);
-      }, 1500);
+        setImportedSummary(null);
+      }, 2500);
     }
   };
 
@@ -310,28 +468,37 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
           </div>
 
           {/* Entity Selector */}
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {(['contacts', 'tasks', 'opportunities'] as const).map(ent => (
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {(['smart', 'contacts', 'tasks', 'opportunities'] as const).map(ent => (
               <button
                 key={ent}
                 type="button"
                 onClick={() => {
                   setEntity(ent);
-                  setCsvText(ent === 'tasks' ? SAMPLE_TASKS_CSV : SAMPLE_CONTACTS_CSV);
+                  setCsvText(
+                    ent === 'smart' 
+                      ? SAMPLE_SMART_CSV 
+                      : ent === 'tasks' 
+                      ? SAMPLE_TASKS_CSV 
+                      : SAMPLE_CONTACTS_CSV
+                  );
                 }}
                 style={{
                   padding: '4px 10px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
                   fontWeight: 600,
-                  textTransform: 'capitalize',
-                  background: entity === ent ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                  border: entity === ent ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid transparent',
-                  color: entity === ent ? 'var(--text-main)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: entity === ent ? 'rgba(167, 139, 250, 0.16)' : 'transparent',
+                  border: entity === ent ? '1px solid rgba(167, 139, 250, 0.35)' : '1px solid transparent',
+                  color: entity === ent ? 'var(--lilac-300)' : 'var(--text-muted)',
                   cursor: 'pointer',
                 }}
               >
-                {ent === 'contacts' ? 'Leads & Contacts' : ent === 'opportunities' ? 'Deals' : 'Tasks'}
+                {ent === 'smart' && <Zap size={12} style={{ color: '#fbbf24' }} />}
+                {ent === 'smart' ? 'Smart Upload' : ent === 'contacts' ? 'Leads & Contacts' : ent === 'opportunities' ? 'Deals' : 'Tasks'}
               </button>
             ))}
           </div>
@@ -529,7 +696,7 @@ export const DataTransferModal: React.FC<DataTransferModalProps> = ({
               {importedCount !== null && (
                 <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', color: '#34d399', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckCircle2 size={16} />
-                  <span>Successfully imported {importedCount} {entity} into your workspace!</span>
+                  <span>{importedSummary || `Successfully imported ${importedCount} records into your workspace!`}</span>
                 </div>
               )}
 

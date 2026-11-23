@@ -25,6 +25,7 @@ import { WorkspaceIntroTourModal } from './components/Onboarding/WorkspaceIntroT
 import { TryOnMobileModal } from './components/Mobile/TryOnMobileModal';
 import { MobilePwaPromptBanner } from './components/Mobile/MobilePwaPromptBanner';
 import { MobileBottomBar } from './components/Mobile/MobileBottomBar';
+import { GlobalSearchModal } from './components/Search/GlobalSearchModal';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -45,6 +46,19 @@ const MainAppContent: React.FC = () => {
   const [mobileModalOpen, setMobileModalOpen] = useState(false);
   const [tourModalOpen, setTourModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+
+  // Global keyboard shortcut: Cmd+K / Ctrl+K
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setGlobalSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Auto-launch workspace education tour once per workspace
   React.useEffect(() => {
@@ -107,6 +121,7 @@ const MainAppContent: React.FC = () => {
           activeTab={activeTab}
           onOpenNotifications={() => setNotifDrawerOpen(true)}
           onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          onOpenGlobalSearch={() => setGlobalSearchOpen(true)}
           onOpenMobile={() => setMobileModalOpen(true)}
           onOpenDataTransfer={() => setDataTransferModalOpen(true)}
           onOpenTour={() => setTourModalOpen(true)}
@@ -255,6 +270,20 @@ const MainAppContent: React.FC = () => {
       <TryOnMobileModal 
         isOpen={mobileModalOpen}
         onClose={() => setMobileModalOpen(false)}
+      />
+
+      {/* Global Cmd+K Instant Search Modal */}
+      <GlobalSearchModal 
+        isOpen={globalSearchOpen}
+        onClose={() => setGlobalSearchOpen(false)}
+        onNavigate={(tab) => {
+          setActiveTab(tab);
+          setGlobalSearchOpen(false);
+        }}
+        onSelectContact={(contactId) => {
+          handleOpenContactProfile(contactId);
+          setGlobalSearchOpen(false);
+        }}
       />
 
       {/* Persistent & Dismissible Floating Mobile PWA Pop-Up Prompt */}

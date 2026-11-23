@@ -113,3 +113,4 @@ export const MobileBottomBar: React.FC<MobileBottomBarProps> = ({
     </nav>
   );
 };
+

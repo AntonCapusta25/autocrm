@@ -1,13 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Task, TaskPriority, TaskStatus, NotionDatabaseView } from '../../types';
 import { 
   CheckSquare, Search, Plus, Filter, Calendar, AlertTriangle, 
-  Clock, CheckCircle, User, Building2, Trash2, Edit, Check, Upload
+  Clock, CheckCircle, User, Building2, Trash2, Edit, Check
 } from 'lucide-react';
 import { TaskModal } from './TaskModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
 import { DataTransferModal } from '../ImportExport/DataTransferModal';
+import { Pagination } from '../Common/Pagination';
 
 type TaskFilterTab = 'all' | 'my_tasks' | 'today' | 'upcoming' | 'overdue' | 'completed';
 
@@ -28,6 +29,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('');
   const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<string>('');
   const [selectedAssigneeFilter, setSelectedAssigneeFilter] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [modalOpen, setModalOpen] = useState(initialTaskModalOpen);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -83,6 +85,17 @@ export const TasksView: React.FC<TasksViewProps> = ({
     }).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
   }, [tasks, filterTab, selectedStatusFilter, selectedPriorityFilter, selectedAssigneeFilter, searchQuery, currentUser, todayStr]);
 
+  // Reset page on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterTab, selectedStatusFilter, selectedPriorityFilter, selectedAssigneeFilter, searchQuery]);
+
+  // Paginated tasks (75 per page)
+  const paginatedTasks = useMemo(() => {
+    const start = (currentPage - 1) * 75;
+    return filteredTasks.slice(start, start + 75);
+  }, [filteredTasks, currentPage]);
+
   const handleEdit = (task: Task) => {
     setEditingTask(task);
     setModalOpen(true);
@@ -117,15 +130,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button 
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => setTransferOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <Upload size={13} /> Import / Export Tasks
-          </button>
-
           <button 
             className="btn btn-lilac"
             onClick={() => {
@@ -207,7 +211,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               No tasks found in this view.
             </div>
           ) : (
-            filteredTasks.map(task => {
+            paginatedTasks.map(task => {
               const isCompleted = task.status === 'Completed';
               const isOverdue = !isCompleted && task.due_date < todayStr;
               const isToday = !isCompleted && task.due_date === todayStr;
@@ -318,7 +322,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               </tr>
             </thead>
             <tbody>
-              {filteredTasks.map(task => {
+              {paginatedTasks.map(task => {
                 const isCompleted = task.status === 'Completed';
                 return (
                   <tr key={task.id} onClick={() => handleEdit(task)} style={{ cursor: 'pointer' }}>
@@ -387,6 +391,15 @@ export const TasksView: React.FC<TasksViewProps> = ({
           })}
         </div>
       )}
+
+      {/* Pagination Bar for Tasks */}
+      <Pagination
+        totalItems={filteredTasks.length}
+        currentPage={currentPage}
+        pageSize={75}
+        onPageChange={setCurrentPage}
+        itemName="tasks"
+      />
 
       {modalOpen && (
         <TaskModal 

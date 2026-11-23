@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Building2, KanbanSquare, 
   CheckSquare, ShieldCheck, Zap, MessageSquare, 
   Calendar, FileText, Sparkles, Sliders, Smartphone,
-  Upload, HelpCircle, X
+  Upload, HelpCircle, X, Lock
 } from 'lucide-react';
 
 export type NavTab = 
@@ -105,27 +105,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              onOpenOnboarding();
-              onCloseMobile?.();
-            }}
-            title="Configure Workspace Modules"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--lilac-300)',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              borderRadius: '4px'
-            }}
-          >
-            <Sliders size={14} />
-          </button>
-
           {onCloseMobile && (
             <button
               type="button"
@@ -240,7 +219,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
               <span>Workflows</span>
             </div>
-            <span className="notion-badge lilac">{activeWorkflowsCount}</span>
+            <span 
+              className="notion-badge"
+              style={{ 
+                background: 'rgba(245, 158, 11, 0.12)', 
+                color: '#f59e0b', 
+                border: '1px solid rgba(245, 158, 11, 0.25)', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '3px',
+                fontSize: '0.64rem',
+                padding: '2px 6px'
+              }}
+            >
+              <Lock size={10} /> Locked
+            </span>
           </button>
         )}
 
@@ -342,48 +335,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <span className="notion-badge">{teamMembers.length}</span>
         </button>
-
-        <button 
-          className="notion-nav-item"
-          onClick={() => { onOpenMarketplace?.(); onCloseMobile?.(); }}
-          style={{ color: 'var(--lilac-300)' }}
-        >
-          <div className="notion-nav-left">
-            <img 
-              src="/assets/clay/voice.png" 
-              alt="" 
-              style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} 
-            />
-            <span>Modules & Add-ons</span>
-          </div>
-          <span className="notion-badge lilac" style={{ fontSize: '0.66rem' }}>✨ Enterprise</span>
-        </button>
-
-        <button 
-          className="notion-nav-item"
-          onClick={() => { onOpenDataTransfer?.(); onCloseMobile?.(); }}
-        >
-          <div className="notion-nav-left">
-            <Upload size={15} />
-            <span>Import & Export</span>
-          </div>
-          <span className="notion-badge" style={{ fontSize: '0.66rem' }}>CSV</span>
-        </button>
-
-        <button 
-          className="notion-nav-item"
-          onClick={() => { onOpenMobile?.(); onCloseMobile?.(); }}
-          style={{ color: '#60a5fa' }}
-        >
-          <div className="notion-nav-left">
-            <Smartphone size={15} style={{ color: '#60a5fa' }} />
-            <span>Try on Mobile (PWA)</span>
-          </div>
-          <span className="notion-badge" style={{ fontSize: '0.66rem', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)' }}>📱 Mobile</span>
-        </button>
       </div>
 
-      {/* Bottom Reconfigure CRM Trigger */}
+      {/* Unified Workspace Settings & Modules Control */}
       <div 
         style={{ 
           padding: '12px 14px', 
@@ -396,12 +350,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <button
           type="button"
-          onClick={onOpenOnboarding}
+          onClick={() => {
+            onOpenOnboarding();
+            onCloseMobile?.();
+          }}
           className="btn btn-secondary btn-sm"
-          style={{ width: '100%', justifyContent: 'center', gap: '6px', fontSize: '0.74rem' }}
+          style={{ 
+            width: '100%', 
+            justifyContent: 'center', 
+            gap: '7px', 
+            fontSize: '0.76rem',
+            color: 'var(--lilac-300)',
+            borderColor: 'var(--lilac-border)',
+            background: 'rgba(167, 139, 250, 0.06)'
+          }}
+          title="Configure Industry, Enabled Modules & Workspace Features"
         >
-          <Sparkles size={13} style={{ color: 'var(--lilac-400)' }} />
-          <span>Customize CRM ({onboardingConfig.industry.split(' ')[0]})</span>
+          <Sliders size={13} style={{ color: 'var(--lilac-400)' }} />
+          <span>Settings & Modules ({onboardingConfig.enabledModules.length}/9)</span>
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', padding: '2px 4px' }}>

@@ -4,7 +4,7 @@ import { WorkflowAutomation, WorkflowActionType } from '../../types';
 import { 
   Zap, Play, Plus, CheckCircle2, Clock, Mail, MessageSquare, 
   UserPlus, Tag, CheckSquare, Webhook, MoreVertical, ToggleLeft, 
-  ToggleRight, ArrowDown, Sparkles, AlertCircle
+  ToggleRight, ArrowDown, Sparkles, AlertCircle, Lock, ShieldCheck, ArrowRight
 } from 'lucide-react';
 
 const ACTION_ICONS: Record<WorkflowActionType, React.ReactNode> = {
@@ -27,6 +27,7 @@ export const WorkflowsView: React.FC = () => {
   const [executingId, setExecutingId] = useState<string | null>(null);
   const [executionMessage, setExecutionMessage] = useState<{ id: string; text: string } | null>(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
+  const [showSandboxDemo, setShowSandboxDemo] = useState(false);
 
   // New Workflow Form State
   const [newWfName, setNewWfName] = useState('');
@@ -90,21 +91,217 @@ export const WorkflowsView: React.FC = () => {
             <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               Automation Workflows
             </h1>
-            <span className="notion-badge lilac">Workflow Engine</span>
+            <span 
+              className="notion-badge" 
+              style={{ 
+                background: 'rgba(245, 158, 11, 0.12)', 
+                color: '#f59e0b', 
+                border: '1px solid rgba(245, 158, 11, 0.25)', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '3px' 
+              }}
+            >
+              <Lock size={11} /> Enterprise Locked
+            </span>
           </div>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Event-driven triggers, multi-step SMS/Email drip campaigns, lead assignment, and external webhook dispatches.
+            Event-driven triggers, multi-step SMS/Email drip campaigns, ERP synchronizations, and webhook dispatches.
           </p>
         </div>
 
-        <button 
-          className="btn btn-lilac" 
-          onClick={() => setNewModalOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          <Plus size={15} /> Create Workflow
-        </button>
+        {showSandboxDemo ? (
+          <button 
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => setShowSandboxDemo(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Lock size={13} style={{ color: '#f59e0b' }} /> Return to Locked View
+          </button>
+        ) : (
+          <button 
+            type="button"
+            className="btn btn-lilac" 
+            onClick={() => openModuleSetupModal('custom_agents')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Sparkles size={14} /> Request Automation
+          </button>
+        )}
       </div>
+
+      {/* When Locked: Show Enterprise Locked Landing Screen */}
+      {!showSandboxDemo ? (
+        <div 
+          className="notion-card animate-fade-in"
+          style={{
+            padding: '48px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            borderRadius: '16px',
+            background: 'linear-gradient(180deg, rgba(23, 27, 38, 0.9) 0%, rgba(10, 12, 16, 0.98) 100%)',
+            border: '1px solid rgba(167, 139, 250, 0.25)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 50px rgba(167, 139, 250, 0.08)',
+            position: 'relative',
+            overflow: 'hidden',
+            maxWidth: '860px',
+            margin: '10px auto 0 auto',
+            width: '100%',
+          }}
+        >
+          {/* Clay 3D Graphic with Lock Overlay */}
+          <div style={{ position: 'relative', marginBottom: '24px' }}>
+            <img 
+              src="/assets/clay/lightning.png" 
+              alt="Workflows" 
+              style={{ width: '84px', height: '84px', objectFit: 'contain', filter: 'drop-shadow(0 12px 24px rgba(167, 139, 250, 0.35))' }} 
+            />
+            <div 
+              style={{
+                position: 'absolute',
+                bottom: '-6px',
+                right: '-6px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: '#0a0c10',
+                border: '2px solid rgba(245, 158, 11, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#f59e0b',
+                boxShadow: '0 0 15px rgba(245, 158, 11, 0.4)',
+              }}
+            >
+              <Lock size={18} />
+            </div>
+          </div>
+
+          <span 
+            style={{
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              color: '#f59e0b',
+              marginBottom: '14px',
+            }}
+          >
+            🔒 Enterprise Module Under Lock
+          </span>
+
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.03em', margin: 0, maxWidth: '640px' }}>
+            Autonomous Workflow Engine & AI Integrations
+          </h2>
+
+          <p style={{ fontSize: '0.94rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: 1.6, marginTop: '12px', marginBottom: '32px' }}>
+            Automations and custom workflows require custom backend setup from our engineering studio. We build and maintain custom webhooks, ERP synchronizations (Exact Online, AFAS, KvK API), and autonomous AI agent triggers tailored to your specific operations.
+          </p>
+
+          {/* Feature Cards Grid */}
+          <div 
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+              gap: '14px', 
+              width: '100%', 
+              textAlign: 'left',
+              marginBottom: '36px' 
+            }}
+          >
+            <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--lilac-300)', fontWeight: 600, fontSize: '0.85rem' }}>
+                <Zap size={15} /> Real-Time Event Triggers
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '6px 0 0', lineHeight: 1.45 }}>
+                Instant lead ingest from Web forms, Stripe events, and Typeform questionnaires with sub-100ms pipeline execution.
+              </p>
+            </div>
+
+            <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', fontWeight: 600, fontSize: '0.85rem' }}>
+                <Sparkles size={15} /> AI Agent Lead Triage
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '6px 0 0', lineHeight: 1.45 }}>
+                Autonomous qualification, meeting agenda preparation, and automatic company enrichment via KvK registry.
+              </p>
+            </div>
+
+            <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', fontWeight: 600, fontSize: '0.85rem' }}>
+                <Mail size={15} /> Automated Drip Campaigns
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '6px 0 0', lineHeight: 1.45 }}>
+                Transactional Resend and Twilio SMS sequences triggered by stage movement and prospect touchpoints.
+              </p>
+            </div>
+
+            <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontWeight: 600, fontSize: '0.85rem' }}>
+                <ShieldCheck size={15} /> 99.9% Uptime & SLA Support
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '6px 0 0', lineHeight: 1.45 }}>
+                Zero maintenance overhead. Handled end-to-end on isolated European serverless clusters by AutoFlow.
+              </p>
+            </div>
+          </div>
+
+          {/* Action Button: Request (Triggers Typeform Flow) */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+            <button
+              type="button"
+              className="btn btn-lilac"
+              onClick={() => openModuleSetupModal('custom_agents')}
+              style={{
+                padding: '14px 38px',
+                fontSize: '0.96rem',
+                fontWeight: 700,
+                gap: '10px',
+                borderRadius: '10px',
+                boxShadow: '0 10px 30px rgba(167, 139, 250, 0.4)',
+                cursor: 'pointer',
+              }}
+            >
+              <Sparkles size={17} />
+              <span>Request Automation Setup</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSandboxDemo(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: '4px',
+              }}
+            >
+              Preview interactive visual workflow sandbox (demo) →
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Visual Workflow Sandbox Demo (If User Clicks Preview) */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <button 
+              className="btn btn-lilac btn-sm" 
+              onClick={() => setNewModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Plus size={14} /> Create Workflow
+            </button>
+          </div>
 
       {/* Main 2-column layout: Workflow Selector on Left, Flowchart on Right */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 340px) 1fr', gap: '20px', alignItems: 'start' }}>
@@ -434,6 +631,8 @@ export const WorkflowsView: React.FC = () => {
           </div>
         )}
       </div>
+      </div>
+      )}
 
       {/* New Workflow Modal */}
       {newModalOpen && (

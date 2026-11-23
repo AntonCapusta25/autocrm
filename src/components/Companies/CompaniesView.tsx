@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Company, Contact, NotionDatabaseView } from '../../types';
 import { 
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { CompanyModal } from './CompanyModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
+import { Pagination } from '../Common/Pagination';
 
 interface CompaniesViewProps {
   onOpenNewTaskForCompany: (company: Company) => void;
@@ -21,19 +22,29 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
   const [activeView, setActiveView] = useState<NotionDatabaseView>('gallery');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
-  const filteredCompanies = companies.filter(c => {
+  const filteredCompanies = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    return (
+    return companies.filter(c => 
       !q ||
       c.name.toLowerCase().includes(q) ||
       (c.industry && c.industry.toLowerCase().includes(q)) ||
       (c.address && c.address.toLowerCase().includes(q)) ||
       (c.notes && c.notes.toLowerCase().includes(q))
     );
-  });
+  }, [companies, searchQuery]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const paginatedCompanies = useMemo(() => {
+    const start = (currentPage - 1) * 75;
+    return filteredCompanies.slice(start, start + 75);
+  }, [filteredCompanies, currentPage]);
 
   const handleEdit = (comp: Company) => {
     setEditingCompany(comp);
@@ -91,7 +102,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       {/* GALLERY VIEW (CARDS) */}
       {activeView === 'gallery' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '16px' }}>
-          {filteredCompanies.map(comp => {
+          {paginatedCompanies.map(comp => {
             const linkedContacts = contacts.filter(c => c.company_name === comp.name || c.company_id === comp.id);
             const linkedDeals = opportunities.filter(o => o.company_name === comp.name || o.company_id === comp.id);
 
@@ -195,7 +206,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
               </tr>
             </thead>
             <tbody>
-              {filteredCompanies.map(comp => (
+              {paginatedCompanies.map(comp => (
                 <tr key={comp.id}>
                   <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{comp.name}</td>
                   <td><span className="notion-tag slate">{comp.industry || '—'}</span></td>
@@ -216,7 +227,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       {/* LIST VIEW */}
       {activeView === 'list' && (
         <div className="notion-card" style={{ padding: '8px 12px' }}>
-          {filteredCompanies.map(comp => (
+          {paginatedCompanies.map(comp => (
             <div
               key={comp.id}
               style={{
@@ -238,6 +249,15 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
           ))}
         </div>
       )}
+
+      {/* Pagination Bar for Companies */}
+      <Pagination
+        totalItems={filteredCompanies.length}
+        currentPage={currentPage}
+        pageSize={75}
+        onPageChange={setCurrentPage}
+        itemName="companies"
+      />
 
       {modalOpen && (
         <CompanyModal 

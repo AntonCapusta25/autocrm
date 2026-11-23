@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   Bell, CheckCircle2, ChevronDown, 
   Plus, Sparkles, ChevronRight, LogOut,
-  Smartphone, Upload, HelpCircle, Menu
+  Smartphone, Upload, HelpCircle, Menu, Search, Sliders
 } from 'lucide-react';
 import { NavTab } from './Sidebar';
 
@@ -11,6 +11,7 @@ interface NavbarProps {
   activeTab: NavTab;
   onOpenNotifications: () => void;
   onOpenOnboarding: () => void;
+  onOpenGlobalSearch: () => void;
   onOpenMobile?: () => void;
   onOpenDataTransfer?: () => void;
   onOpenTour?: () => void;
@@ -34,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab, 
   onOpenNotifications,
   onOpenOnboarding,
+  onOpenGlobalSearch,
   onOpenMobile,
   onOpenDataTransfer,
   onOpenTour,
@@ -176,34 +178,36 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right: Actions, Notifications, User */}
+        {/* Right: Global Search, Tour, Notifications, User */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Try on Mobile PWA Button */}
-          {onOpenMobile && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={onOpenMobile}
-              style={{ fontSize: '0.74rem', gap: '5px', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)' }}
-              title="Install Web App on Phone & Configure Push Notifications"
-            >
-              <Smartphone size={13} />
-              <span>Try on Mobile</span>
-            </button>
-          )}
-
-          {/* Import / Export Center Button */}
-          {onOpenDataTransfer && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={onOpenDataTransfer}
-              style={{ padding: '6px', color: 'var(--text-secondary)' }}
-              title="Import / Export Center"
-            >
-              <Upload size={14} />
-            </button>
-          )}
+          {/* Global Search Bar (Cmd+K) */}
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={onOpenGlobalSearch}
+            style={{ 
+              fontSize: '0.76rem', 
+              gap: '7px', 
+              padding: '5px 10px', 
+              background: 'var(--bg-card)', 
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--text-secondary)'
+            }}
+            title="Global Search across contacts, companies, deals, tasks, docs (⌘K)"
+          >
+            <Search size={13} style={{ color: 'var(--lilac-300)' }} />
+            <span>Search...</span>
+            <kbd style={{
+              fontSize: '0.64rem',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--lilac-300)',
+              fontWeight: 600,
+              marginLeft: '4px'
+            }}>⌘K</kbd>
+          </button>
 
           {/* Workspace Product Tour Button */}
           {onOpenTour && (
@@ -217,18 +221,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <HelpCircle size={14} />
             </button>
           )}
-
-          {/* Reconfigure CRM Quick Pill */}
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={onOpenOnboarding}
-            style={{ fontSize: '0.74rem', gap: '6px', color: 'var(--lilac-300)', borderColor: 'var(--lilac-border)' }}
-            title="Customize Workspace Modules & Industry"
-          >
-            <Sparkles size={12} />
-            <span>Modules ({onboardingConfig.enabledModules.length}/9)</span>
-          </button>
 
           {/* Notifications Bell */}
           <button
@@ -340,6 +332,85 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
 
                 <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '6px', paddingTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      onOpenOnboarding();
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '7px 8px',
+                      background: 'transparent',
+                      color: 'var(--text-secondary)',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <Sliders size={14} style={{ color: 'var(--lilac-300)' }} />
+                    <span>Workspace Settings & Modules</span>
+                  </button>
+
+                  {onOpenDataTransfer && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        onOpenDataTransfer();
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '7px 8px',
+                        background: 'transparent',
+                        color: 'var(--text-secondary)',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <Upload size={14} />
+                      <span>Smart Import & Export CSV</span>
+                    </button>
+                  )}
+
+                  {onOpenMobile && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        onOpenMobile();
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '7px 8px',
+                        background: 'transparent',
+                        color: '#60a5fa',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <Smartphone size={14} />
+                      <span>Mobile PWA & Notifications</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {

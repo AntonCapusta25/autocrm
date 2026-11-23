@@ -9,6 +9,7 @@ import { ContactModal } from './ContactModal';
 import { ContactDetailDrawer } from './ContactDetailDrawer';
 import { DataTransferModal } from '../ImportExport/DataTransferModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
+import { Pagination } from '../Common/Pagination';
 
 interface ContactsViewProps {
   onOpenNewTaskForContact: (contact: Contact) => void;
@@ -27,6 +28,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompanyFilter, setSelectedCompanyFilter] = useState('');
   const [selectedTagFilter, setSelectedTagFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
@@ -73,6 +75,17 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
       return matchesSearch && matchesCompany && matchesTag;
     });
   }, [contacts, searchQuery, selectedCompanyFilter, selectedTagFilter]);
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCompanyFilter, selectedTagFilter]);
+
+  // Paginated contacts (75 per page)
+  const paginatedContacts = useMemo(() => {
+    const start = (currentPage - 1) * 75;
+    return filteredContacts.slice(start, start + 75);
+  }, [filteredContacts, currentPage]);
 
   const handleEdit = (contact: Contact) => {
     setEditingContact(contact);
@@ -195,7 +208,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredContacts.map(contact => (
+                paginatedContacts.map(contact => (
                   <tr 
                     key={contact.id}
                     onClick={() => setDrawerContact(contact)}
@@ -348,7 +361,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
       {/* List View: Clean Minimal Notion List */}
       {activeView === 'list' && (
         <div className="notion-card" style={{ padding: '8px 12px' }}>
-          {filteredContacts.map(c => (
+          {paginatedContacts.map(c => (
             <div
               key={c.id}
               onClick={() => setDrawerContact(c)}
@@ -384,6 +397,15 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
           ))}
         </div>
       )}
+
+      {/* Pagination Bar for Contacts */}
+      <Pagination
+        totalItems={filteredContacts.length}
+        currentPage={currentPage}
+        pageSize={75}
+        onPageChange={setCurrentPage}
+        itemName="contacts"
+      />
 
       {/* Modals & Drawers */}
       {modalOpen && (
