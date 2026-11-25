@@ -60,7 +60,8 @@ const MainAppContent: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Auto-launch workspace education tour once per workspace
+  // Auto-launch workspace education tour once per workspace (temporarily commented out)
+  /*
   React.useEffect(() => {
     if (isAuthenticated && currentWorkspace?.id) {
       const tourKey = `autoflow_tour_seen_${currentWorkspace.id}`;
@@ -70,6 +71,7 @@ const MainAppContent: React.FC = () => {
       }
     }
   }, [isAuthenticated, currentWorkspace?.id]);
+  */
 
   // Pre-selected entities for task modal
   const [taskInitialContact, setTaskInitialContact] = useState<Contact | null>(null);
@@ -254,7 +256,8 @@ const MainAppContent: React.FC = () => {
         initialEntity="contacts"
       />
 
-      {/* Workspace Education & Product Tour Popover */}
+      {/* Workspace Education & Product Tour Popover (temporarily commented out) */}
+      {/*
       <WorkspaceIntroTourModal 
         isOpen={tourModalOpen}
         onClose={() => {
@@ -265,6 +268,7 @@ const MainAppContent: React.FC = () => {
         }}
         onOpenMobileGuide={() => setMobileModalOpen(true)}
       />
+      */}
 
       {/* Try on Mobile & PWA Setup Flow */}
       <TryOnMobileModal 
