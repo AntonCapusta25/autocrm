@@ -3,14 +3,26 @@ import { useApp } from '../../context/AppContext';
 import { CalendarAppointment } from '../../types';
 import { 
   Calendar as CalendarIcon, Clock, Plus, Video, MapPin, 
-  User, CheckCircle2, ChevronLeft, ChevronRight, X
+  User, CheckCircle2, ChevronLeft, ChevronRight, X, RefreshCw
 } from 'lucide-react';
+import { GoogleLogoSvg } from '../Integrations/GoogleAccountsModal';
 
 export const CalendarView: React.FC = () => {
-  const { appointments, addAppointment, updateAppointment, contacts, currentUser } = useApp();
+  const { 
+    appointments, 
+    addAppointment, 
+    updateAppointment, 
+    contacts, 
+    currentUser,
+    googleAccounts,
+    openGoogleModal,
+    syncAllGoogleAccounts
+  } = useApp();
 
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
+  const [calendarSyncFeedback, setCalendarSyncFeedback] = useState<string | null>(null);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -20,12 +32,35 @@ export const CalendarView: React.FC = () => {
   const [endTime, setEndTime] = useState('14:45');
   const [locationType, setLocationType] = useState<any>('google_meet');
   const [notes, setNotes] = useState('');
+  const [selectedGoogleAccountEmail, setSelectedGoogleAccountEmail] = useState<string>(
+    googleAccounts.find(g => g.is_primary)?.email || googleAccounts[0]?.email || ''
+  );
+  const [syncToGoogleCalendar, setSyncToGoogleCalendar] = useState(true);
+
+  // Sync state when google accounts update
+  React.useEffect(() => {
+    if (!selectedGoogleAccountEmail && googleAccounts.length > 0) {
+      setSelectedGoogleAccountEmail(googleAccounts[0].email);
+    }
+  }, [googleAccounts, selectedGoogleAccountEmail]);
+
+  const handleSyncAllCalendar = async () => {
+    setIsSyncingCalendar(true);
+    try {
+      const res = await syncAllGoogleAccounts();
+      setCalendarSyncFeedback(res.message);
+      setTimeout(() => setCalendarSyncFeedback(null), 4000);
+    } finally {
+      setIsSyncingCalendar(false);
+    }
+  };
 
   const handleBook = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
     const contact = contacts.find(c => c.id === contactId);
+    const matchedAccount = googleAccounts.find(g => g.email === selectedGoogleAccountEmail);
 
     addAppointment({
       title: title.trim(),
@@ -39,7 +74,10 @@ export const CalendarView: React.FC = () => {
       location_type: locationType,
       meeting_link: locationType === 'google_meet' ? `https://meet.google.com/autoflow-${Date.now().toString().slice(-4)}` : undefined,
       notes: notes.trim() || undefined,
-      status: 'confirmed'
+      status: 'confirmed',
+      google_account_id: syncToGoogleCalendar && matchedAccount ? matchedAccount.id : undefined,
+      google_account_email: syncToGoogleCalendar ? selectedGoogleAccountEmail : undefined,
+      google_calendar_synced: syncToGoogleCalendar && Boolean(selectedGoogleAccountEmail),
     });
 
     setTitle('');
@@ -69,14 +107,61 @@ export const CalendarView: React.FC = () => {
           </p>
         </div>
 
-        <button 
-          className="btn btn-lilac"
-          onClick={() => setBookingModalOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          <Plus size={15} /> Book Appointment
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Google Calendar Multi-Account Trigger */}
+          <button 
+            type="button"
+            className="btn btn-secondary"
+            onClick={openGoogleModal}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+            title="Manage connected Google accounts"
+          >
+            <GoogleLogoSvg size={15} />
+            <span>Google Accounts ({googleAccounts.filter(g => g.sync_calendar).length})</span>
+          </button>
+
+          {/* Sync Calendar */}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleSyncAllCalendar}
+            disabled={isSyncingCalendar || googleAccounts.length === 0}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+            title="Trigger 2-way sync with Google Calendar"
+          >
+            <RefreshCw size={13} className={isSyncingCalendar ? 'spin' : ''} />
+            <span>{isSyncingCalendar ? 'Syncing...' : 'Sync Calendar'}</span>
+          </button>
+
+          <button 
+            className="btn btn-lilac"
+            onClick={() => setBookingModalOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Plus size={15} /> Book Appointment
+          </button>
+        </div>
       </div>
+
+      {/* Sync Status Banner */}
+      {calendarSyncFeedback && (
+        <div 
+          style={{ 
+            padding: '8px 12px', 
+            borderRadius: '8px', 
+            background: 'rgba(52, 211, 153, 0.1)', 
+            border: '1px solid rgba(52, 211, 153, 0.25)',
+            color: '#34d399',
+            fontSize: '0.8rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <CheckCircle2 size={15} />
+          <span>{calendarSyncFeedback}</span>
+        </div>
+      )}
 
       {/* Appointments List / Grid */}
       {appointments.length === 0 ? (
@@ -105,10 +190,31 @@ export const CalendarView: React.FC = () => {
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="notion-tag lilac" style={{ textTransform: 'uppercase', fontSize: '0.68rem' }}>
-                  {appt.location_type.replace('_', ' ')}
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="notion-tag lilac" style={{ textTransform: 'uppercase', fontSize: '0.68rem' }}>
+                    {appt.location_type.replace('_', ' ')}
+                  </span>
+                  {appt.google_calendar_synced && (
+                    <span 
+                      style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        gap: '4px', 
+                        fontSize: '0.66rem', 
+                        color: '#34d399',
+                        background: 'rgba(52, 211, 153, 0.08)',
+                        border: '1px solid rgba(52, 211, 153, 0.2)',
+                        padding: '1px 6px',
+                        borderRadius: '4px'
+                      }}
+                      title={`Synced with Google Calendar (${appt.google_account_email || 'Connected'})`}
+                    >
+                      <GoogleLogoSvg size={10} />
+                      <span>{appt.google_account_email ? appt.google_account_email.split('@')[0] : 'Synced'}</span>
+                    </span>
+                  )}
+                </div>
                 <span className="notion-tag emerald" style={{ fontSize: '0.68rem' }}>
                   {appt.status}
                 </span>
@@ -258,6 +364,45 @@ export const CalendarView: React.FC = () => {
                     <option value="in_person">In-Person Office Meeting</option>
                   </select>
                 </div>
+
+                {googleAccounts.length > 0 && (
+                  <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'var(--notion-surface)', border: '1px solid var(--notion-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                        <GoogleLogoSvg size={14} />
+                        <span>Google Calendar 2-Way Sync</span>
+                      </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={syncToGoogleCalendar}
+                          onChange={e => setSyncToGoogleCalendar(e.target.checked)}
+                        />
+                        <span>Sync Event</span>
+                      </label>
+                    </div>
+
+                    {syncToGoogleCalendar && (
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                          Target Calendar Account
+                        </label>
+                        <select
+                          className="select"
+                          value={selectedGoogleAccountEmail}
+                          onChange={e => setSelectedGoogleAccountEmail(e.target.value)}
+                          style={{ height: '32px', fontSize: '0.78rem' }}
+                        >
+                          {googleAccounts.map(g => (
+                            <option key={g.id} value={g.email}>
+                              {g.name} &lt;{g.email}&gt; {g.is_primary ? '(Primary)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>

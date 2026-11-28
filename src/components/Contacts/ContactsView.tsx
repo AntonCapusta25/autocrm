@@ -10,6 +10,7 @@ import { ContactDetailDrawer } from './ContactDetailDrawer';
 import { DataTransferModal } from '../ImportExport/DataTransferModal';
 import { NotionViewSwitcher } from '../Common/NotionViewSwitcher';
 import { Pagination } from '../Common/Pagination';
+import { GoogleLogoSvg } from '../Integrations/GoogleAccountsModal';
 
 interface ContactsViewProps {
   onOpenNewTaskForContact: (contact: Contact) => void;
@@ -22,7 +23,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
   selectedContactId,
   onClearSelectedContact,
 }) => {
-  const { contacts, deleteContact, exportContactsCSV, companies } = useApp();
+  const { contacts, deleteContact, exportContactsCSV, companies, googleAccounts, openGoogleModal } = useApp();
 
   const [activeView, setActiveView] = useState<NotionDatabaseView>('table');
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,6 +124,18 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Google Contacts Multi-Account Button */}
+          <button 
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={openGoogleModal}
+            title="Manage connected Google accounts and sync contacts"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <GoogleLogoSvg size={14} />
+            <span>Google Contacts ({googleAccounts.filter(g => g.sync_contacts).length})</span>
+          </button>
+
           <button 
             className="btn btn-secondary btn-sm"
             onClick={() => setCsvModalOpen(true)}
@@ -236,8 +249,18 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
                           {contact.first_name[0]}{contact.last_name[0]}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                            {contact.first_name} {contact.last_name}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                              {contact.first_name} {contact.last_name}
+                            </span>
+                            {contact.google_synced && (
+                              <span 
+                                title="Synced with Google Contacts" 
+                                style={{ display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                <GoogleLogoSvg size={11} />
+                              </span>
+                            )}
                           </div>
                           {contact.job_title && (
                             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>

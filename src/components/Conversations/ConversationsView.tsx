@@ -3,8 +3,10 @@ import { useApp } from '../../context/AppContext';
 import { ConversationThread, MessageChannel } from '../../types';
 import { 
   MessageSquare, Mail, Phone, Send, Search, CheckCheck, 
-  Sparkles, Tag, Building2, User, Clock, ArrowUpRight
+  Sparkles, Tag, Building2, User, Clock, ArrowUpRight,
+  RefreshCw, CheckCircle2, ChevronDown
 } from 'lucide-react';
+import { GoogleLogoSvg } from '../Integrations/GoogleAccountsModal';
 
 const CHANNEL_ICONS: Record<MessageChannel, React.ReactNode> = {
   sms: <span style={{ color: '#34d399' }}>SMS</span>,
@@ -14,30 +16,72 @@ const CHANNEL_ICONS: Record<MessageChannel, React.ReactNode> = {
 };
 
 export const ConversationsView: React.FC = () => {
-  const { conversations, sendMessage, markConversationRead, contacts, opportunities, openModuleSetupModal } = useApp();
+  const { 
+    conversations, 
+    sendMessage, 
+    markConversationRead, 
+    contacts, 
+    opportunities, 
+    openModuleSetupModal,
+    googleAccounts,
+    openGoogleModal,
+    syncAllGoogleAccounts
+  } = useApp();
 
   const [activeThreadId, setActiveThreadId] = useState<string>(conversations[0]?.id || '');
   const [selectedChannelFilter, setSelectedChannelFilter] = useState<'all' | MessageChannel>('all');
+  const [selectedGoogleFilter, setSelectedGoogleFilter] = useState<string>('all');
   const [replyText, setReplyText] = useState('');
   const [replyChannel, setReplyChannel] = useState<MessageChannel>('email');
+  const [senderGoogleEmail, setSenderGoogleEmail] = useState<string>(
+    googleAccounts.find(g => g.is_primary)?.email || googleAccounts[0]?.email || ''
+  );
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSyncingMail, setIsSyncingMail] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  // Sync senderGoogleEmail if accounts load
+  React.useEffect(() => {
+    if (!senderGoogleEmail && googleAccounts.length > 0) {
+      setSenderGoogleEmail(googleAccounts[0].email);
+    }
+  }, [googleAccounts, senderGoogleEmail]);
+
+  const handleSyncAllMail = async () => {
+    setIsSyncingMail(true);
+    try {
+      const res = await syncAllGoogleAccounts();
+      setSyncFeedback(res.message);
+      setTimeout(() => setSyncFeedback(null), 4000);
+    } finally {
+      setIsSyncingMail(false);
+    }
+  };
 
   const filteredThreads = conversations.filter(t => {
     if (selectedChannelFilter !== 'all' && t.active_channel !== selectedChannelFilter) return false;
+    if (selectedGoogleFilter !== 'all' && t.google_account_email !== selectedGoogleFilter) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      return t.contact_name.toLowerCase().includes(q) || t.last_message.toLowerCase().includes(q);
+      return (
+        t.contact_name.toLowerCase().includes(q) || 
+        t.last_message.toLowerCase().includes(q) ||
+        (t.google_account_email && t.google_account_email.toLowerCase().includes(q))
+      );
     }
     return true;
   });
 
-  const activeThread = conversations.find(t => t.id === activeThreadId) || conversations[0];
+  const activeThread = conversations.find(t => t.id === activeThreadId) || filteredThreads[0] || conversations[0];
   const activeContact = contacts.find(c => c.id === activeThread?.contact_id);
   const activeOpp = opportunities.find(o => o.contact_id === activeThread?.contact_id);
 
   const handleSelectThread = (thread: ConversationThread) => {
     setActiveThreadId(thread.id);
     setReplyChannel(thread.active_channel);
+    if (thread.google_account_email) {
+      setSenderGoogleEmail(thread.google_account_email);
+    }
     if (thread.unread) {
       markConversationRead(thread.id);
     }
@@ -46,7 +90,12 @@ export const ConversationsView: React.FC = () => {
   const handleSendReply = (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyText.trim() || !activeThread) return;
-    sendMessage(activeThread.id, replyText.trim(), replyChannel);
+    sendMessage(
+      activeThread.id, 
+      replyText.trim(), 
+      replyChannel, 
+      replyChannel === 'email' ? senderGoogleEmail : undefined
+    );
     setReplyText('');
   };
 
@@ -71,16 +120,62 @@ export const ConversationsView: React.FC = () => {
           </p>
         </div>
 
-        <button 
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => openModuleSetupModal('whatsapp_cloud')}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', borderColor: 'var(--lilac-border)' }}
-        >
-          <span>✨</span>
-          <span>Connect WhatsApp Cloud API</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Google Accounts Management Button */}
+          <button 
+            type="button"
+            className="btn btn-secondary"
+            onClick={openGoogleModal}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+            title="Manage connected Google accounts"
+          >
+            <GoogleLogoSvg size={15} />
+            <span>Google Accounts ({googleAccounts.length})</span>
+          </button>
+
+          {/* Sync Gmail Now */}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleSyncAllMail}
+            disabled={isSyncingMail || googleAccounts.length === 0}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}
+            title="Trigger 2-way sync with Google Mail"
+          >
+            <RefreshCw size={13} className={isSyncingMail ? 'spin' : ''} />
+            <span>{isSyncingMail ? 'Syncing...' : 'Sync Gmail'}</span>
+          </button>
+
+          <button 
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => openModuleSetupModal('whatsapp_cloud')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', borderColor: 'var(--lilac-border)' }}
+          >
+            <span>✨</span>
+            <span>Connect WhatsApp Cloud API</span>
+          </button>
+        </div>
       </div>
+
+      {syncFeedback && (
+        <div 
+          style={{ 
+            padding: '8px 12px', 
+            borderRadius: '8px', 
+            background: 'rgba(52, 211, 153, 0.1)', 
+            border: '1px solid rgba(52, 211, 153, 0.25)',
+            color: '#34d399',
+            fontSize: '0.8rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <CheckCircle2 size={15} />
+          <span>{syncFeedback}</span>
+        </div>
+      )}
 
       {/* Main 3-Column Omnichannel Dashboard */}
       <div 
@@ -123,6 +218,23 @@ export const ConversationsView: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* Google Inboxes Filter */}
+            {googleAccounts.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <select
+                  value={selectedGoogleFilter}
+                  onChange={e => setSelectedGoogleFilter(e.target.value)}
+                  className="select"
+                  style={{ width: '100%', height: '28px', fontSize: '0.74rem', padding: '2px 8px' }}
+                >
+                  <option value="all">All Google Inboxes ({googleAccounts.length})</option>
+                  {googleAccounts.map(g => (
+                    <option key={g.id} value={g.email}>{g.email} ({g.name})</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Threads Scroll */}
@@ -156,6 +268,24 @@ export const ConversationsView: React.FC = () => {
                     <span className="notion-tag" style={{ fontSize: '0.64rem', padding: '1px 5px', textTransform: 'uppercase' }}>
                       {thread.active_channel}
                     </span>
+                    {thread.google_account_email && (
+                      <span 
+                        style={{ 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          gap: '3px', 
+                          fontSize: '0.62rem', 
+                          color: '#60a5fa',
+                          background: 'rgba(96, 165, 250, 0.08)',
+                          border: '1px solid rgba(96, 165, 250, 0.2)',
+                          padding: '1px 5px',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <GoogleLogoSvg size={10} />
+                        {thread.google_account_email.split('@')[0]}
+                      </span>
+                    )}
                     <p 
                       style={{ 
                         fontSize: '0.76rem', 
@@ -252,6 +382,15 @@ export const ConversationsView: React.FC = () => {
                       <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       <span>•</span>
                       <span style={{ textTransform: 'uppercase' }}>{msg.channel}</span>
+                      {msg.google_account_email && (
+                        <>
+                          <span>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#60a5fa' }}>
+                            <GoogleLogoSvg size={10} />
+                            {msg.google_account_email}
+                          </span>
+                        </>
+                      )}
                       {isUser && <CheckCheck size={12} style={{ color: 'var(--lilac-400)' }} />}
                     </div>
                   </div>
@@ -260,7 +399,25 @@ export const ConversationsView: React.FC = () => {
             </div>
 
             {/* Reply Composer Form */}
-            <form onSubmit={handleSendReply} style={{ padding: '14px 20px', borderTop: '1px solid var(--notion-border)', background: 'var(--notion-surface)' }}>
+            <form onSubmit={handleSendReply} style={{ padding: '12px 20px', borderTop: '1px solid var(--notion-border)', background: 'var(--notion-surface)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {replyChannel === 'email' && googleAccounts.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                  <GoogleLogoSvg size={13} />
+                  <span>Send From:</span>
+                  <select
+                    value={senderGoogleEmail}
+                    onChange={e => setSenderGoogleEmail(e.target.value)}
+                    className="select"
+                    style={{ height: '26px', fontSize: '0.74rem', padding: '1px 8px', width: 'auto', background: 'var(--notion-surface-card)' }}
+                  >
+                    {googleAccounts.map(g => (
+                      <option key={g.id} value={g.email}>
+                        {g.name} &lt;{g.email}&gt; {g.is_primary ? '(Primary)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input
                   type="text"

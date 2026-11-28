@@ -57,6 +57,8 @@ export interface Contact {
   notes?: string;
   tags: string[];
   custom_fields: Record<string, string>;
+  google_synced?: boolean;
+  google_account_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -244,6 +246,25 @@ export interface WorkflowAutomation {
   created_at: string;
 }
 
+// ─── Google Workspace & Accounts Integration ───
+export type GoogleScope = 'gmail' | 'calendar' | 'contacts';
+
+export interface GoogleAccount {
+  id: string;
+  workspace_id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  scopes: GoogleScope[];
+  sync_gmail: boolean;
+  sync_calendar: boolean;
+  sync_contacts: boolean;
+  last_synced_at?: string;
+  status: 'connected' | 'syncing' | 'error' | 'paused';
+  connected_at: string;
+  is_primary?: boolean;
+}
+
 // ─── GoHighLevel 1-to-1 Unified Conversations / Inbox ───
 export type MessageChannel = 'sms' | 'email' | 'whatsapp' | 'webchat';
 
@@ -254,6 +275,7 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   status?: 'sent' | 'delivered' | 'read';
+  google_account_email?: string;
 }
 
 export interface ConversationThread {
@@ -268,6 +290,8 @@ export interface ConversationThread {
   last_message_at: string;
   unread: boolean;
   messages: ChatMessage[];
+  google_account_id?: string;
+  google_account_email?: string;
 }
 
 // ─── GoHighLevel / Notion Smart Appointments & Calendar ───
@@ -286,6 +310,9 @@ export interface CalendarAppointment {
   location_type: 'google_meet' | 'zoom' | 'phone' | 'in_person';
   notes?: string;
   status: 'confirmed' | 'cancelled' | 'completed';
+  google_account_id?: string;
+  google_account_email?: string;
+  google_calendar_synced?: boolean;
 }
 
 // ─── Notion 1-to-1 Block Documents & SOPs ───

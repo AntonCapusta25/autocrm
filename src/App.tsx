@@ -26,13 +26,14 @@ import { TryOnMobileModal } from './components/Mobile/TryOnMobileModal';
 import { MobilePwaPromptBanner } from './components/Mobile/MobilePwaPromptBanner';
 import { MobileBottomBar } from './components/Mobile/MobileBottomBar';
 import { GlobalSearchModal } from './components/Search/GlobalSearchModal';
+import { GoogleAccountsModal } from './components/Integrations/GoogleAccountsModal';
 import { Contact, Company } from './types';
 
 const MainAppContent: React.FC = () => {
   const { 
     isAuthenticated, isOnboardingOpen, setIsOnboardingOpen, isModuleEnabled,
     isModuleModalOpen, activeSetupModuleId, openModuleSetupModal, closeModuleSetupModal,
-    currentWorkspace
+    currentWorkspace, isGoogleModalOpen, closeGoogleModal
   } = useApp();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
 
@@ -288,6 +289,12 @@ const MainAppContent: React.FC = () => {
           handleOpenContactProfile(contactId);
           setGlobalSearchOpen(false);
         }}
+      />
+
+      {/* Multi-Account Google Workspace Integration Modal */}
+      <GoogleAccountsModal
+        isOpen={isGoogleModalOpen}
+        onClose={closeGoogleModal}
       />
 
       {/* Persistent & Dismissible Floating Mobile PWA Pop-Up Prompt */}

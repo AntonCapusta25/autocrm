@@ -6,6 +6,7 @@ import {
   Smartphone, Upload, HelpCircle, Menu, Search, Sliders
 } from 'lucide-react';
 import { NavTab } from './Sidebar';
+import { GoogleLogoSvg } from './Integrations/GoogleAccountsModal';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -44,7 +45,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { 
     currentWorkspace, workspaces, createWorkspace, switchWorkspace,
     currentUser, teamMembers, switchCurrentUser,
-    unreadNotificationCount, onboardingConfig, signOutAccount
+    unreadNotificationCount, onboardingConfig, signOutAccount,
+    openGoogleModal, googleAccounts
   } = useApp();
 
   const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
@@ -355,6 +357,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <Sliders size={14} style={{ color: 'var(--lilac-300)' }} />
                     <span>Workspace Settings & Modules</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      openGoogleModal();
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '7px 8px',
+                      background: 'transparent',
+                      color: 'var(--text-secondary)',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <GoogleLogoSvg size={14} />
+                    <span>Google Workspace & Accounts ({googleAccounts.length})</span>
                   </button>
 
                   {onOpenDataTransfer && (

@@ -1,7 +1,8 @@
 import { 
   Workspace, TeamMember, Company, Contact, Opportunity, Task, ContactActivity, 
   AppNotification, OnboardingConfig, CRMModuleDefinition, PaidModuleDefinition, 
-  WorkflowAutomation, ConversationThread, CalendarAppointment, NotionDoc 
+  WorkflowAutomation, ConversationThread, CalendarAppointment, NotionDoc,
+  GoogleAccount
 } from '../types';
 
 export const INITIAL_WORKSPACE: Workspace = {
@@ -10,6 +11,39 @@ export const INITIAL_WORKSPACE: Workspace = {
   owner_id: 'user-alex',
   created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
 };
+
+export const INITIAL_GOOGLE_ACCOUNTS: GoogleAccount[] = [
+  {
+    id: 'gacc-1',
+    workspace_id: 'ws-main-1',
+    email: 'alex@autoflow.studio',
+    name: 'Alex Vance',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+    scopes: ['gmail', 'calendar', 'contacts'],
+    sync_gmail: true,
+    sync_calendar: true,
+    sync_contacts: true,
+    last_synced_at: new Date(Date.now() - 4 * 60000).toISOString(),
+    status: 'connected',
+    connected_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    is_primary: true,
+  },
+  {
+    id: 'gacc-2',
+    workspace_id: 'ws-main-1',
+    email: 'operations@autoflow.studio',
+    name: 'AutoFlow Operations',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
+    scopes: ['gmail', 'calendar'],
+    sync_gmail: true,
+    sync_calendar: true,
+    sync_contacts: false,
+    last_synced_at: new Date(Date.now() - 18 * 60000).toISOString(),
+    status: 'connected',
+    connected_at: new Date(Date.now() - 14 * 86400000).toISOString(),
+    is_primary: false,
+  },
+];
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
@@ -781,6 +815,8 @@ export const INITIAL_CONVERSATIONS: ConversationThread[] = [
     last_message: "Our security team just approved the SOC2 review. Can we finalize the annual enterprise proposal this Thursday?",
     last_message_at: new Date(Date.now() - 25 * 60000).toISOString(),
     unread: true,
+    google_account_id: 'gacc-1',
+    google_account_email: 'alex@autoflow.studio',
     messages: [
       {
         id: 'msg-1',
@@ -908,7 +944,10 @@ export const INITIAL_APPOINTMENTS: CalendarAppointment[] = [
     location_type: 'google_meet',
     meeting_link: 'https://meet.google.com/xyz-aflow-demo',
     notes: 'Walk through agreement line items, SLA specifications, and go-live date.',
-    status: 'confirmed'
+    status: 'confirmed',
+    google_account_id: 'gacc-1',
+    google_account_email: 'alex@autoflow.studio',
+    google_calendar_synced: true
   },
   {
     id: 'appt-2',

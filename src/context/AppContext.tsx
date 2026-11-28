@@ -4,9 +4,10 @@ import {
   Contact, Company, Opportunity, Task, ContactActivity, 
   Workspace, TeamMember, AppNotification, NotificationPreferences, PipelineStage, UserRole,
   OnboardingConfig, WorkflowAutomation, ConversationThread, CalendarAppointment, NotionDoc,
-  ChatMessage, MessageChannel, NotionBlock, CRMModuleId, ModuleSetupRequest
+  ChatMessage, MessageChannel, NotionBlock, CRMModuleId, ModuleSetupRequest,
+  GoogleAccount, GoogleScope
 } from '../types';
-import { DEFAULT_ONBOARDING_CONFIG } from '../lib/initialData';
+import { DEFAULT_ONBOARDING_CONFIG, INITIAL_GOOGLE_ACCOUNTS } from '../lib/initialData';
 import { getSupabaseClient } from '../lib/supabase';
 
 interface RegisterCompanyPayload {
@@ -87,9 +88,20 @@ interface AppContextType {
 
   // GoHighLevel Unified Inbox / Conversations (Tenant Scoped)
   conversations: ConversationThread[];
-  sendMessage: (threadId: string, text: string, channel?: MessageChannel) => void;
+  sendMessage: (threadId: string, text: string, channel?: MessageChannel, googleAccountEmail?: string) => void;
   markConversationRead: (threadId: string) => void;
   createConversationForContact: (contact: Contact) => string;
+
+  // Google Workspace & Multi-Account Integration (Tenant Scoped)
+  googleAccounts: GoogleAccount[];
+  isGoogleModalOpen: boolean;
+  openGoogleModal: () => void;
+  closeGoogleModal: () => void;
+  connectGoogleAccount: (accountData?: { email: string; name: string; avatar?: string; scopes?: GoogleScope[] }) => Promise<GoogleAccount>;
+  disconnectGoogleAccount: (accountId: string) => void;
+  toggleGoogleAccountSync: (accountId: string, syncType: 'sync_gmail' | 'sync_calendar' | 'sync_contacts') => void;
+  syncGoogleAccount: (accountId: string, service?: 'all' | 'gmail' | 'calendar' | 'contacts') => Promise<{ success: boolean; message: string }>;
+  syncAllGoogleAccounts: () => Promise<{ success: boolean; message: string }>;
 
   // Smart Appointments (Tenant Scoped)
   appointments: CalendarAppointment[];
@@ -239,6 +251,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [allGoogleAccounts, setAllGoogleAccounts] = useState<GoogleAccount[]>(() => {
+    const saved = localStorage.getItem(LS_PREFIX + 'google_accounts');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (_) {}
+    }
+    return INITIAL_GOOGLE_ACCOUNTS;
+  });
+
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [activeSetupModuleId, setActiveSetupModuleId] = useState<string | null>(null);
 
@@ -339,6 +363,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(LS_PREFIX + 'module_requests', JSON.stringify(allModuleRequests));
   }, [allModuleRequests]);
 
+  useEffect(() => {
+    localStorage.setItem(LS_PREFIX + 'google_accounts', JSON.stringify(allGoogleAccounts));
+  }, [allGoogleAccounts]);
+
   // Strictly Scoped Current Tenant Workspace & User
   const currentWorkspace = useMemo<Workspace>(() => {
     return (
@@ -430,6 +458,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     () => allNotionDocs.filter(d => d.workspace_id === currentWorkspace.id),
     [allNotionDocs, currentWorkspace.id]
   );
+  const googleAccounts = useMemo(() => {
+    const wsId = currentWorkspace.id;
+    const list = allGoogleAccounts.filter(g => g.workspace_id === wsId);
+    if (list.length === 0 && wsId) {
+      return INITIAL_GOOGLE_ACCOUNTS.map(g => ({ ...g, workspace_id: wsId }));
+    }
+    return list;
+  }, [allGoogleAccounts, currentWorkspace.id]);
 
   // Hydrate tenant data from Supabase for a given workspaceId
   const hydrateWorkspaceFromSupabase = useCallback(async (wsId: string) => {
@@ -1375,7 +1411,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // GoHighLevel Unified Inbox / Conversations (Tenant Scoped)
-  const sendMessage = (threadId: string, text: string, channel: MessageChannel = 'email') => {
+  const sendMessage = (threadId: string, text: string, channel: MessageChannel = 'email', googleAccountEmail?: string) => {
     if (!text.trim()) return;
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
@@ -1384,6 +1420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       text: text.trim(),
       timestamp: new Date().toISOString(),
       status: 'delivered',
+      google_account_email: googleAccountEmail,
     };
 
     const sb = getSupabaseClient();
@@ -1393,6 +1430,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const updated: ConversationThread = {
           ...t,
           active_channel: channel,
+          google_account_email: googleAccountEmail || t.google_account_email,
           last_message: text.trim(),
           last_message_at: new Date().toISOString(),
           unread: false,
@@ -1411,7 +1449,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         contact_id: thread.contact_id,
         workspace_id: currentWorkspace.id,
         type: 'message_sent',
-        title: `Message sent via ${channel.toUpperCase()}`,
+        title: `Message sent via ${channel.toUpperCase()}${googleAccountEmail ? ` (${googleAccountEmail})` : ''}`,
         description: text.trim(),
         created_by: currentUser.name,
         created_at: new Date().toISOString(),
@@ -1419,6 +1457,125 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAllActivities(prev => [act, ...prev]);
       if (sb) sb.from('contact_activities').upsert(act).then(() => {});
     }
+  };
+
+  // Google Workspace Multi-Account Integration
+  const openGoogleModal = () => setIsGoogleModalOpen(true);
+  const closeGoogleModal = () => setIsGoogleModalOpen(false);
+
+  const connectGoogleAccount = async (accountData?: { 
+    email: string; 
+    name: string; 
+    avatar?: string; 
+    scopes?: GoogleScope[] 
+  }): Promise<GoogleAccount> => {
+    const email = accountData?.email || `user.${Date.now().toString().slice(-4)}@autoflow.studio`;
+    const name = accountData?.name || email.split('@')[0].replace('.', ' ');
+    const scopes: GoogleScope[] = accountData?.scopes || ['gmail', 'calendar', 'contacts'];
+
+    const newAcc: GoogleAccount = {
+      id: `gacc-${Date.now()}`,
+      workspace_id: currentWorkspace.id,
+      email,
+      name,
+      avatar: accountData?.avatar || `https://images.unsplash.com/photo-${1534528741775 + Math.floor(Math.random() * 5000)}?w=100&auto=format&fit=crop&q=80`,
+      scopes,
+      sync_gmail: scopes.includes('gmail'),
+      sync_calendar: scopes.includes('calendar'),
+      sync_contacts: scopes.includes('contacts'),
+      last_synced_at: new Date().toISOString(),
+      status: 'connected',
+      connected_at: new Date().toISOString(),
+      is_primary: allGoogleAccounts.filter(g => g.workspace_id === currentWorkspace.id).length === 0,
+    };
+
+    setAllGoogleAccounts(prev => [...prev, newAcc]);
+
+    // Send in-app notification
+    const notif: AppNotification = {
+      id: `notif-${Date.now()}`,
+      workspace_id: currentWorkspace.id,
+      user_id: currentUser.user_id,
+      title: 'Google Account Connected',
+      message: `Successfully connected ${email} with ${scopes.join(', ')} sync enabled.`,
+      type: 'workflow_run',
+      read: false,
+      created_at: new Date().toISOString(),
+    };
+    setAllNotifications(prev => [notif, ...prev]);
+
+    return newAcc;
+  };
+
+  const disconnectGoogleAccount = (accountId: string) => {
+    setAllGoogleAccounts(prev => prev.filter(g => g.id !== accountId));
+  };
+
+  const toggleGoogleAccountSync = (accountId: string, syncType: 'sync_gmail' | 'sync_calendar' | 'sync_contacts') => {
+    setAllGoogleAccounts(prev => prev.map(g => {
+      if (g.id === accountId) {
+        return {
+          ...g,
+          [syncType]: !g[syncType],
+          last_synced_at: new Date().toISOString(),
+        };
+      }
+      return g;
+    }));
+  };
+
+  const syncGoogleAccount = async (
+    accountId: string, 
+    service: 'all' | 'gmail' | 'calendar' | 'contacts' = 'all'
+  ): Promise<{ success: boolean; message: string }> => {
+    // Optimistically set to syncing
+    setAllGoogleAccounts(prev => prev.map(g => g.id === accountId ? { ...g, status: 'syncing' } : g));
+
+    // Simulate 2-way sync network latency with Google API
+    await new Promise(res => setTimeout(res, 850));
+
+    const now = new Date().toISOString();
+    setAllGoogleAccounts(prev => prev.map(g => {
+      if (g.id === accountId) {
+        return {
+          ...g,
+          status: 'connected',
+          last_synced_at: now,
+        };
+      }
+      return g;
+    }));
+
+    const targetAccount = allGoogleAccounts.find(g => g.id === accountId);
+    const email = targetAccount?.email || 'Google Account';
+
+    return {
+      success: true,
+      message: `Bidirectional sync completed for ${email} (${service.toUpperCase()}). All threads, calendar slots, and contact cards are up to date.`
+    };
+  };
+
+  const syncAllGoogleAccounts = async (): Promise<{ success: boolean; message: string }> => {
+    const tenantAccounts = allGoogleAccounts.filter(g => g.workspace_id === currentWorkspace.id);
+    if (tenantAccounts.length === 0) {
+      return { success: false, message: 'No Google accounts currently connected to this workspace.' };
+    }
+
+    setAllGoogleAccounts(prev => prev.map(g => 
+      g.workspace_id === currentWorkspace.id ? { ...g, status: 'syncing' } : g
+    ));
+
+    await new Promise(res => setTimeout(res, 1100));
+
+    const now = new Date().toISOString();
+    setAllGoogleAccounts(prev => prev.map(g => 
+      g.workspace_id === currentWorkspace.id ? { ...g, status: 'connected', last_synced_at: now } : g
+    ));
+
+    return {
+      success: true,
+      message: `Synchronized ${tenantAccounts.length} Google account${tenantAccounts.length > 1 ? 's' : ''} across Gmail, Calendar, and Contacts.`
+    };
   };
 
   const markConversationRead = (threadId: string) => {
@@ -1832,6 +1989,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateNotificationPreferences,
         requestPushPermission,
         sendTestNotification,
+        googleAccounts,
+        isGoogleModalOpen,
+        openGoogleModal,
+        closeGoogleModal,
+        connectGoogleAccount,
+        disconnectGoogleAccount,
+        toggleGoogleAccountSync,
+        syncGoogleAccount,
+        syncAllGoogleAccounts,
         moduleSetupRequests,
         isModuleModalOpen,
         activeSetupModuleId,
